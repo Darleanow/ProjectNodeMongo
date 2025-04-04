@@ -14,7 +14,44 @@ block content
     
     button#user-location(style="margin-left: 10px;") Utiliser ma position
     
+    .add-mode-toggle(style="display: inline-block; margin-left: 15px;")
+      input#toggle-add-mode(type="checkbox")
+      label(for="toggle-add-mode") Mode ajout de spot
+  
   #map(style="height: 500px;")
+  
+  // Form that appears when clicking on the map
+  #spot-form-overlay(style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 1000;")
+    #spot-form-container(style="background: white; max-width: 500px; margin: 50px auto; padding: 20px; border-radius: 8px;")
+      h3 Ajouter un nouveau spot
+      
+      form#new-spot-form
+        input#form-lat(type="hidden", name="lat")
+        input#form-lng(type="hidden", name="lng")
+        
+        .form-group(style="margin-bottom: 15px;")
+          label(for="form-title") Titre:
+          input#form-title(type="text", name="title", required, style="width: 100%; padding: 8px;")
+        
+        .form-group(style="margin-bottom: 15px;")
+          label(for="form-description") Description:
+          textarea#form-description(name="description", required, style="width: 100%; padding: 8px; height: 100px;")
+        
+        .form-group(style="margin-bottom: 15px;")
+          label(for="form-category") Catégorie:
+          select#form-category(name="category", required, style="width: 100%; padding: 8px;")
+            option(value="good-place") Bonnes adresses
+            option(value="alert") Alertes
+            option(value="event") Événements
+            option(value="other") Autres
+        
+        // Author field would be replaced with authenticated user in a real app
+        // For now, use a mock ID for testing (will need to be a valid ObjectId in MongoDB)
+        input#form-author(type="hidden", name="author", value="645f340dca190f342a2ebb55")
+        
+        .form-actions(style="display: flex; justify-content: space-between; margin-top: 20px;")
+          button.cancel-button(type="button", style="padding: 8px 15px; background-color: #6c757d; color: white; border: none; border-radius: 4px;") Annuler
+          button.submit-button(type="submit", style="padding: 8px 15px; background-color: #0077cc; color: white; border: none; border-radius: 4px;") Ajouter
   
   .spot-actions(style="margin-top: 15px; text-align: right;")
     a.button(href="/spots/create", style="padding: 8px 15px; background-color: #0077cc; color: white; text-decoration: none; border-radius: 4px;") Ajouter un spot
@@ -62,6 +99,10 @@ block content
         shadowSize: [41, 41]
       })
     };
+    
+    // Add spot mode variables
+    let addSpotMode = false;
+    let temporaryMarker = null;
     
     // Load spots from API
     fetch('/api/spots')
@@ -144,4 +185,152 @@ block content
       } else {
         alert('La géolocalisation n\'est pas supportée par votre navigateur.');
       }
+    });
+    
+    // Toggle add spot mode
+    document.getElementById('toggle-add-mode').addEventListener('change', function() {
+      addSpotMode = this.checked;
+      
+      if (addSpotMode) {
+        map.getContainer().style.cursor = 'crosshair';
+      } else {
+        map.getContainer().style.cursor = '';
+        
+        // Remove temporary marker if it exists
+        if (temporaryMarker) {
+          map.removeLayer(temporaryMarker);
+          temporaryMarker = null;
+        }
+      }
+    });
+    
+    // Handle map click to add a spot
+    map.on('click', function(e) {
+      if (!addSpotMode) return;
+      
+      const clickedLat = e.latlng.lat;
+      const clickedLng = e.latlng.lng;
+      
+      // Remove previous temporary marker if it exists
+      if (temporaryMarker) {
+        map.removeLayer(temporaryMarker);
+      }
+      
+      // Add a temporary marker
+      temporaryMarker = L.marker([clickedLat, clickedLng], {
+        icon: L.icon({
+          iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-orange.png',
+          iconSize: [25, 41],
+          iconAnchor: [12, 41],
+          popupAnchor: [1, -34],
+          shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+          shadowSize: [41, 41]
+        })
+      }).addTo(map);
+      
+      // Set form values
+      document.getElementById('form-lat').value = clickedLat;
+      document.getElementById('form-lng').value = clickedLng;
+      
+      // Show form overlay
+      document.getElementById('spot-form-overlay').style.display = 'block';
+    });
+    
+    // Cancel button handler
+    document.querySelector('.cancel-button').addEventListener('click', function() {
+      // Hide form overlay
+      document.getElementById('spot-form-overlay').style.display = 'none';
+      
+      // Remove temporary marker
+      if (temporaryMarker) {
+        map.removeLayer(temporaryMarker);
+        temporaryMarker = null;
+      }
+    });
+    
+    // Form submission handler
+    document.getElementById('new-spot-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const formData = {
+        title: document.getElementById('form-title').value,
+        description: document.getElementById('form-description').value,
+        category: document.getElementById('form-category').value,
+        lat: parseFloat(document.getElementById('form-lat').value),
+        lng: parseFloat(document.getElementById('form-lng').value),
+        author: document.getElementById('form-author').value
+      };
+      
+      // Format the data according to the API's expected structure
+      const apiData = {
+        title: formData.title,
+        description: formData.description,
+        category: formData.category,
+        lat: formData.lat,
+        lng: formData.lng,
+        author: formData.author
+      };
+      
+      console.log('Sending data to API:', apiData);
+      
+      // Submit data to API
+      fetch('/api/spots', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(apiData)
+      })
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`Server responded with status: ${res.status}`);
+        }
+        return res.json();
+      })
+      .then(newSpot => {
+        console.log('New spot created:', newSpot);
+        
+        // Hide form overlay
+        document.getElementById('spot-form-overlay').style.display = 'none';
+        
+        // Remove temporary marker
+        if (temporaryMarker) {
+          map.removeLayer(temporaryMarker);
+          temporaryMarker = null;
+        }
+        
+        // Get coordinates from the new spot's structure
+        // Handle both the nested coords object and direct lat/lng properties
+        const spotLat = newSpot.coords ? newSpot.coords.lat : newSpot.lat;
+        const spotLng = newSpot.coords ? newSpot.coords.lng : newSpot.lng;
+        
+        // Add new marker with proper icon
+        const icon = icons[newSpot.category] || icons.other;
+        
+        const marker = L.marker([spotLat, spotLng], {icon: icon})
+          .addTo(map)
+          .bindPopup(`
+            <h3>${newSpot.title}</h3>
+            <p>${newSpot.description}</p>
+            <p><small>Catégorie: ${newSpot.category}</small></p>
+            <a href="/spots/${newSpot._id}">Voir détails</a>
+          `)
+          .openPopup();
+        
+        // Add to markers array for filtering
+        allMarkers.push({
+          marker: marker,
+          category: newSpot.category
+        });
+        
+        // Reset form
+        document.getElementById('new-spot-form').reset();
+        
+        // Show success message
+        alert('Spot ajouté avec succès! ID: ' + newSpot._id);
+      })
+      .catch(err => {
+        console.error('Error adding spot:', err);
+        alert('Erreur lors de l\'ajout du spot. Veuillez réessayer.');
+      });
     });

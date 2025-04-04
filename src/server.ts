@@ -8,6 +8,7 @@ import { fileURLToPath } from 'url'
 import connectDB from '@/database/database.js'
 import spotRoutes from './routes/spot.js'
 import alertRoutes from './routes/alert.js'
+import userRoutes from './routes/user.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -35,6 +36,7 @@ app.get('/map', (req, res) => res.render('map', { title: 'Carte' }))
 // Main routes
 app.use(spotRoutes)
 app.use(alertRoutes)
+app.use(userRoutes)
 
 // Start server
 app.listen(port, () => {
