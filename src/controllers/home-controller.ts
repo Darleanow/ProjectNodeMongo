@@ -1,5 +1,7 @@
 import { Request, Response } from 'express'
 
-export async function home(req: Request, res: Response) {
-  res.status(200).send('Hello World!')
+const home = (req: Request, res: Response): void => {
+  res.render('index', { title: 'Accueil' })
 }
+
+export default home
