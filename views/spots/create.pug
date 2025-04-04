@@ -1,10 +1,57 @@
 extends ../layout
 
 block content
-  h2 Ajouter un nouveau spot
-  form(method='POST', action='/spots')
-    input(type='text', name='title', placeholder='Titre')
-    textarea(name='description', placeholder='Description')
-    input(type='text', name='lat', placeholder='Latitude')
-    input(type='text', name='lng', placeholder='Longitude')
-    button(type='submit') Envoyer
+  h2 Ajouter une alerte
+  
+  .form-container(style="max-width: 600px; margin: 0 auto;")
+    form(method='POST', action='/api/alerts')
+      .form-group
+        label(for="spotId") Lieu:
+        select#spotId(name='spotId', required)
+          option(value='') Sélectionnez un lieu
+          // This will be populated by JavaScript
+      
+      .form-group
+        label(for="alertType") Type d'alerte:
+        select#alertType(name='alertType', required)
+          option(value='') Sélectionnez un type
+          option(value='traffic') Trafic
+          option(value='weather') Météo
+          option(value='safety') Sécurité
+          option(value='event') Événement
+          option(value='other') Autre
+      
+      .form-group
+        label(for="severity") Niveau de sévérité (1-5):
+        input#severity(type='range', name='severity', min='1', max='5', value='3')
+        span#severity-value 3
+      
+      .form-group
+        label(for="metadata-description") Description détaillée:
+        textarea#metadata-description(name='metadata[description]', rows='4', placeholder='Description détaillée de l\'alerte')
+      
+      .form-actions(style="margin-top: 20px;")
+        button(type='submit', style="background-color: #d9534f;") Ajouter l'alerte
+  
+  script.
+    // Update severity value display
+    document.getElementById('severity').addEventListener('input', function() {
+      document.getElementById('severity-value').textContent = this.value;
+    });
+    
+    // Load spots for the dropdown
+    fetch('/api/spots')
+      .then(res => res.json())
+      .then(spots => {
+        const spotSelect = document.getElementById('spotId');
+        
+        spots.forEach(spot => {
+          const option = document.createElement('option');
+          option.value = spot._id;
+          option.textContent = spot.title;
+          spotSelect.appendChild(option);
+        });
+      })
+      .catch(err => {
+        console.error('Error loading spots:', err);
+      });

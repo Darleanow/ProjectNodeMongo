@@ -6,6 +6,8 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import connectDB from '@/database/database.js'
+import spotRoutes from './routes/spot.js'
+import alertRoutes from './routes/alert.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -16,7 +18,6 @@ const port = process.env.PORT || 3000
 // View engine
 app.set('view engine', 'pug')
 app.set('views', path.join(__dirname, '../views'))
-
 
 // Middleware
 app.use(cors())
@@ -29,7 +30,10 @@ connectDB()
 
 // Routes
 app.get('/', (req, res) => res.render('index', { title: 'Accueil' }))
-app.get('/map', (req, res) => res.render('map', { title: 'Carte' }))
+
+// Main routes
+app.use(spotRoutes)
+app.use(alertRoutes)
 
 // Start server
 app.listen(port, () => {
