@@ -1,7 +1,7 @@
 {
-  "name": "express-typescript-boilerplate",
+  "name": "project-node-mongo",
   "version": "2.0.0",
-  "description": "Minimalistic boilerplate to quick-start express-typescript-boilerplate",
+  "description": "Express mongo db project",
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
