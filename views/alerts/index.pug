@@ -2,77 +2,71 @@ extends ../layout
 
 block content
   h2= title
-  
-  // Alert type distribution chart
-  .chart-container(style="position: relative; height:300px; width:100%; margin-bottom: 30px")
+
+  .chart-container
     canvas#alertTypeChart
-  
-  // Recent alerts list
+
   h3 Alertes récentes
-  
-  table.alerts-table(style="width: 100%; border-collapse: collapse;")
+
+  table.alerts-table
     thead
       tr
-        th(style="text-align: left; padding: 8px;") Type
-        th(style="text-align: left; padding: 8px;") Lieu
-        th(style="text-align: left; padding: 8px;") Sévérité
-        th(style="text-align: left; padding: 8px;") Date
+        th Type
+        th Lieu
+        th Sévérité
+        th Date
 
     tbody
       each alert in recentAlerts
         tr
-          td(style="padding: 8px;")= alert.alertType
-          td(style="padding: 8px;")
+          td= alert.alertType
+          td
             if alert.spotId
               a(href=`/spots/${alert.spotId._id}`)= alert.spotId.title
             else
               span Lieu inconnu
-          td(style="padding: 8px;")
-            .severity(class=`severity-${alert.severity}`)= alert.severity
-          td(style="padding: 8px;")= alert.timestamp.toLocaleString()
+          td
+            span(class=`severity severity-${alert.severity}`)= alert.severity
+          td= alert.timestamp.toLocaleString()
 
   script(src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js")
   script.
-    // Parse the alert types data
-    const alertTypesData = !{alertTypesData}; 
-    
-    // Prepare data for the chart
-    const labels = alertTypesData.map(type => type._id);
-    const counts = alertTypesData.map(type => type.count);
-    
-    // Define colors for different alert types
-    const colors = {
-      'traffic': 'rgba(255, 99, 132, 0.7)',
-      'weather': 'rgba(54, 162, 235, 0.7)',
-      'safety': 'rgba(255, 206, 86, 0.7)',
-      'event': 'rgba(75, 192, 192, 0.7)',
-      'other': 'rgba(153, 102, 255, 0.7)'
-    };
-    
-    // Set up the chart
-    const ctx = document.getElementById('alertTypeChart').getContext('2d');
-    const chart = new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: labels,
-        datasets: [{
-          label: 'Nombre d\'alertes par type',
-          data: counts,
-          backgroundColor: labels.map(label => colors[label] || 'rgba(153, 102, 255, 0.7)'),
-          borderColor: labels.map(label => colors[label]?.replace('0.7', '1') || 'rgba(153, 102, 255, 1)'),
-          borderWidth: 1
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          y: {
-            beginAtZero: true,
-            ticks: {
-              precision: 0  // Only show integer values
+    (() => {
+      const alertTypesData = !{alertTypesData};
+
+      const labels = alertTypesData.map(type => type._id);
+      const counts = alertTypesData.map(type => type.count);
+
+      const colors = {
+        traffic: 'rgba(255, 99, 132, 0.7)',
+        weather: 'rgba(54, 162, 235, 0.7)',
+        safety: 'rgba(255, 206, 86, 0.7)',
+        event: 'rgba(75, 192, 192, 0.7)',
+        other: 'rgba(153, 102, 255, 0.7)'
+      };
+
+      const ctx = document.getElementById('alertTypeChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Nombre d\'alertes par type',
+            data: counts,
+            backgroundColor: labels.map(label => colors[label] || colors.other),
+            borderColor: labels.map(label => colors[label]?.replace('0.7', '1') || colors.other.replace('0.7', '1')),
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { precision: 0 }
             }
           }
         }
-      }
-    });
+      });
+    })();

@@ -1,172 +1,142 @@
-<!-- views/spots/create.pug -->
 extends ../layout
 
 block content
   h2 Ajouter un spot ou une alerte
-  
-  .form-container(style="max-width: 600px; margin: 0 auto;")
+
+  .form-container
     form#unified-form(method='POST', action='/api/spots')
-      input#form-lat(type="hidden", name="lat")
-      input#form-lng(type="hidden", name="lng")
-      
+      input#form-lat(type='hidden', name='lat')
+      input#form-lng(type='hidden', name='lng')
+
       .form-group
-        label(for="form-title") Titre:
-        input#form-title(type="text", name="title", required)
-      
+        label(for='form-title') Titre:
+        input#form-title(type='text', name='title', required)
+
       .form-group
-        label(for="form-description") Description:
-        textarea#form-description(name="description", required, rows="4")
-      
+        label(for='form-description') Description:
+        textarea#form-description(name='description', required, rows='4')
+
       .form-group
-        label(for="form-category") Type:
-        select#form-category(name="category", required, onchange="handleCategoryChange()")
-          option(value="good-place") Bonnes adresses
-          option(value="alert") Alertes
-          option(value="event") Événements
-          option(value="other") Autres
-      
-      // Alert-specific fields (hidden by default)
-      #alert-fields(style="display: none;")
+        label(for='form-category') Type:
+        select#form-category(name='category', required)
+          option(value='good-place') Bonnes adresses
+          option(value='alert') Alertes
+          option(value='event') Événements
+          option(value='other') Autres
+
+      #alert-fields.hidden
         .form-group
-          label(for="alertType") Type d'alerte:
+          label(for='alertType') Type d'alerte:
           select#alertType(name='alertType')
             option(value='traffic') Trafic
             option(value='weather') Météo
             option(value='safety') Sécurité
             option(value='event') Événement
             option(value='other') Autre
-        
+
         .form-group
-          label(for="severity") Niveau de sévérité (1-5):
+          label(for='severity') Niveau de sévérité (1–5):
           input#severity(type='range', name='severity', min='1', max='5', value='3')
           span#severity-value 3
-      
-      // Address search field
+
       .form-group
-        label(for="address-search") Recherche par adresse:
-        input#address-search(type="text", placeholder="Entrez une adresse")
-        button#search-button(type="button") Rechercher
-      
-      // Author field would be replaced with authenticated user in a real app
-      input#form-author(type="hidden", name="author", value="645f340dca190f342a2ebb55")
-      
-      .form-actions(style="margin-top: 20px;")
+        label(for='address-search') Recherche par adresse:
+        input#address-search(type='text', placeholder='Entrez une adresse')
+        button#search-button(type='button') Rechercher
+
+      input#form-author(type='hidden', name='author', value='645f340dca190f342a2ebb55')
+
+      .form-actions
         button#submit-button(type='submit') Ajouter
 
+  script(src="https://unpkg.com/axios/dist/axios.min.js")
   script.
-    // Update severity value display
-    document.getElementById('severity').addEventListener('input', function() {
-      document.getElementById('severity-value').textContent = this.value;
-    });
-    
-    // Show/hide alert fields based on category
-    function handleCategoryChange() {
-      const category = document.getElementById('form-category').value;
+    (() => {
+      const form = document.getElementById('unified-form');
+      const category = document.getElementById('form-category');
       const alertFields = document.getElementById('alert-fields');
-      const formAction = document.getElementById('unified-form');
-      
-      if (category === 'alert') {
-        alertFields.style.display = 'block';
-        formAction.action = '/api/alerts';
-      } else {
-        alertFields.style.display = 'none';
-        formAction.action = '/api/spots';
-      }
-    }
-    
-    // Initialize category handler
-    handleCategoryChange();
-    
-    // Address search functionality
-    document.getElementById('search-button').addEventListener('click', function() {
-      const address = document.getElementById('address-search').value;
-      if (!address) return;
-      
-      // Use Nominatim API (OpenStreetMap) for geocoding
-      fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`)
-        .then(response => response.json())
-        .then(data => {
-          if (data && data.length > 0) {
-            const result = data[0];
-            document.getElementById('form-lat').value = result.lat;
-            document.getElementById('form-lng').value = result.lon;
-            alert(`Adresse trouvée: Lat ${result.lat}, Lng ${result.lon}`);
+      const severityInput = document.getElementById('severity');
+      const severityValue = document.getElementById('severity-value');
+      const latInput = document.getElementById('form-lat');
+      const lngInput = document.getElementById('form-lng');
+      const addressInput = document.getElementById('address-search');
+      const authorInput = document.getElementById('form-author');
+
+      const updateAlertVisibility = () => {
+        const selected = category.value;
+        form.action = selected === 'alert' ? '/api/alerts' : '/api/spots';
+        alertFields.classList.toggle('hidden', selected !== 'alert');
+      };
+
+      const updateSeverityDisplay = () => {
+        severityValue.textContent = severityInput.value;
+      };
+
+      category.addEventListener('change', updateAlertVisibility);
+      severityInput.addEventListener('input', updateSeverityDisplay);
+
+      document.getElementById('search-button').addEventListener('click', async () => {
+        const query = addressInput.value.trim();
+        if (!query) return;
+        try {
+          const { data } = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
+          if (data?.length > 0) {
+            const { lat, lon } = data[0];
+            latInput.value = lat;
+            lngInput.value = lon;
+            alert(`Adresse trouvée: ${lat}, ${lon}`);
           } else {
-            alert('Adresse non trouvée');
+            alert('Adresse non trouvée.');
           }
-        })
-        .catch(error => {
-          console.error('Error during geocoding:', error);
-          alert('Erreur lors de la recherche d\'adresse');
-        });
-    });
-    
-    // Form submission handler
-    document.getElementById('unified-form').addEventListener('submit', function(e) {
-      const category = document.getElementById('form-category').value;
-      
-      // Ensure we have coordinates
-      if (!document.getElementById('form-lat').value || !document.getElementById('form-lng').value) {
-        e.preventDefault();
-        alert('Veuillez spécifier une position en utilisant la recherche d\'adresse');
-        return;
-      }
-      
-      // Different submission handling based on category
-      if (category === 'alert') {
-        e.preventDefault();
-        
-        // Format alert data
-        const formData = {
-          spotId: '', // This needs to be created first
-          alertType: document.getElementById('alertType').value,
-          severity: parseInt(document.getElementById('severity').value),
-          metadata: {
-            description: document.getElementById('form-description').value
-          }
-        };
-        
-        // First create a spot, then create an alert linked to it
-        const spotData = {
-          title: document.getElementById('form-title').value,
-          description: document.getElementById('form-description').value,
-          category: 'alert',
-          lat: parseFloat(document.getElementById('form-lat').value),
-          lng: parseFloat(document.getElementById('form-lng').value),
-          author: document.getElementById('form-author').value
-        };
-        
-        // Submit spot first, then alert
-        fetch('/api/spots', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(spotData)
-        })
-        .then(res => {
-          if (!res.ok) throw new Error(`Server responded with status: ${res.status}`);
-          return res.json();
-        })
-        .then(newSpot => {
-          // Now create the alert linked to this spot
-          formData.spotId = newSpot._id;
-          
-          return fetch('/api/alerts', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(formData)
+        } catch (err) {
+          console.error(err);
+          alert('Erreur lors de la recherche.');
+        }
+      });
+
+      form.addEventListener('submit', async (e) => {
+        const selected = category.value;
+        const lat = latInput.value;
+        const lng = lngInput.value;
+
+        if (!lat || !lng) {
+          e.preventDefault();
+          alert('Veuillez spécifier une position.');
+          return;
+        }
+
+        if (selected !== 'alert') return;
+
+        e.preventDefault(); // Handle alert flow manually
+
+        try {
+          const spotRes = await axios.post('/api/spots', {
+            title: form['title'].value,
+            description: form['description'].value,
+            category: 'alert',
+            lat: parseFloat(lat),
+            lng: parseFloat(lng),
+            author: authorInput.value
           });
-        })
-        .then(res => {
-          if (!res.ok) throw new Error(`Server responded with status: ${res.status}`);
-          return res.json();
-        })
-        .then(newAlert => {
+
+          const alertRes = await axios.post('/api/alerts', {
+            spotId: spotRes.data._id,
+            alertType: form['alertType'].value,
+            severity: parseInt(form['severity'].value),
+            metadata: {
+              description: form['description'].value
+            }
+          });
+
           alert('Alerte ajoutée avec succès!');
           window.location.href = '/alerts';
-        })
-        .catch(err => {
-          console.error('Error adding alert:', err);
-          alert('Erreur lors de l\'ajout de l\'alerte. Veuillez réessayer.');
-        });
-      }
-    });
+        } catch (err) {
+          console.error(err);
+          alert('Erreur lors de l’enregistrement.');
+        }
+      });
+
+      // Init
+      updateSeverityDisplay();
+      updateAlertVisibility();
+    })();
