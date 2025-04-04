@@ -2,15 +2,15 @@ extends layout
 
 block content
   h2 Carte des spots
-  
+
   .map-controls(style="margin-bottom: 15px;")
     // Add address search bar
     .address-search-container(style="margin-bottom: 15px;")
       label(for="map-address-search") Rechercher un lieu:
-      input#map-address-search(type="text", placeholder="Entrez une adresse", style="width: 60%; margin-right: 10px; padding: 8px;")
+      input#map-address-search(type="text" placeholder="Entrez une adresse" style="width: 60%; margin-right: 10px; padding: 8px;")
       button#map-address-search-button(style="padding: 8px 15px;") Rechercher
       #map-address-results(style="display: none; position: absolute; z-index: 1000;")
-    
+
     label(for="category-filter") Filtrer par catégorie:
     select#category-filter(style="margin: 0 10px;")
       option(value="all") Tous
@@ -18,82 +18,85 @@ block content
       option(value="alert") Alertes
       option(value="event") Événements
       option(value="other") Autres
-    
+
     button#user-location(style="margin-left: 10px;") Utiliser ma position
-    
-    .add-mode-toggle(style="display: inline-block; margin-left: 15px;")
+
+    .add-mode-toggle(style="display: inline-flex; align-items: center; gap: 10px; margin-left: 15px;")
+  label(for="toggle-add-mode" style="display: flex; align-items: center; gap: 10px; cursor: pointer;")
+    .toggle-switch
       input#toggle-add-mode(type="checkbox")
-      label(for="toggle-add-mode") Mode ajout de spot
-  
+      .toggle-slider
+    span Mode ajout de spot
+
   #map(style="height: 500px;")
-  
+
   // Form that appears when clicking on the map
   #spot-form-overlay(style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 1000;")
     #spot-form-container(style="background: white; max-width: 500px; margin: 50px auto; padding: 20px; border-radius: 8px;")
       h3 Ajouter un nouveau spot
-      
+
       form#new-spot-form
-        input#form-lat(type="hidden", name="lat")
-        input#form-lng(type="hidden", name="lng")
-        
+        input#form-lat(type="hidden" name="lat")
+        input#form-lng(type="hidden" name="lng")
+
         .form-group(style="margin-bottom: 15px;")
           label(for="form-title") Titre:
-          input#form-title(type="text", name="title", required, style="width: 100%; padding: 8px;")
-        
+          input#form-title(type="text" name="title", required, style="width: 100%; padding: 8px;")
+
         .form-group(style="margin-bottom: 15px;")
           label(for="form-description") Description:
           textarea#form-description(name="description", required, style="width: 100%; padding: 8px; height: 100px;")
-        
+
         .form-group(style="margin-bottom: 15px;")
           label(for="form-category") Catégorie:
-          select#form-category(name="category", required, style="width: 100%; padding: 8px;", onchange="handleCategoryChange()")
+          select#form-category(name="category", required, style="width: 100%; padding: 8px;" onchange="handleCategoryChange()")
             option(value="good-place") Bonnes adresses
             option(value="alert") Alertes
             option(value="event") Événements
             option(value="other") Autres
-        
+
         // Alert-specific fields (hidden by default)
         #alert-fields(style="display: none;")
           .form-group(style="margin-bottom: 15px;")
             label(for="alertType") Type d'alerte:
-            select#alertType(name='alertType', style="width: 100%; padding: 8px;")
+            select#alertType(name='alertType' style="width: 100%; padding: 8px;")
               option(value='traffic') Trafic
               option(value='weather') Météo
               option(value='safety') Sécurité
               option(value='event') Événement
               option(value='other') Autre
-          
+
           .form-group(style="margin-bottom: 15px;")
             label(for="severity") Niveau de sévérité (1-5):
-            input#severity(type='range', name='severity', min='1', max='5', value='3', style="width: 100%;")
+            input#severity(type='range' name='severity' min='1' max='5' value='3' style="width: 100%;")
             span#severity-value 3
-        
+
         // Address search field
         .form-group(style="margin-bottom: 15px;")
           label(for="address-search") Vérifier l'adresse:
-          input#address-search(type="text", placeholder="Entrez une adresse pour confirmer", style="width: 100%; padding: 8px;")
+          input#address-search(type="text" placeholder="Entrez une adresse pour confirmer" style="width: 100%; padding: 8px;")
           #address-results
-        
+
         // Author field would be replaced with authenticated user in a real app
-        input#form-author(type="hidden", name="author", value="645f340dca190f342a2ebb55")
-        
+        input#form-author(type="hidden" name="author" value="645f340dca190f342a2ebb55")
+
         .form-actions(style="display: flex; justify-content: space-between; margin-top: 20px;")
-          button.cancel-button(type="button", style="padding: 8px 15px; background-color: #6c757d; color: white; border: none; border-radius: 4px;") Annuler
-          button.submit-button(type="submit", style="padding: 8px 15px; background-color: #0077cc; color: white; border: none; border-radius: 4px;") Ajouter
-  
+          button.cancel-button(type="button" style="padding: 8px 15px; background-color: #6c757d; color: white; border: none; border-radius: 4px;") Annuler
+          button.submit-button(type="submit" style="padding: 8px 15px; background-color: #0077cc; color: white; border: none; border-radius: 4px;") Ajouter
+
   .spot-actions(style="margin-top: 15px; text-align: center;")
     button#show-map-help(style="padding: 8px 15px; background-color: #0077cc; color: white; border: none; border-radius: 4px; cursor: pointer;") Comment ajouter du contenu
-  
+
   script(src="/js/address-search.js")
   script.
-    
+
     const map = L.map('map').setView([48.85, 2.35], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-    
-    
+
+
     let allMarkers = [];
-    
-    
+
+
     const icons = {
       'good-place': L.icon({
         iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
@@ -128,31 +131,31 @@ block content
         shadowSize: [41, 41]
       })
     };
-    
-    
+
+
     let addSpotMode = false;
     let temporaryMarker = null;
-    
-    
+
+
     const mapAddressSearch = new AddressSearch({
       inputSelector: '#map-address-search',
       resultSelector: '#map-address-results'
     });
-    
-    
+
+
     const formAddressSearch = new AddressSearch({
       inputSelector: '#address-search',
       resultSelector: '#address-results',
       latInputSelector: '#form-lat',
       lngInputSelector: '#form-lng'
     });
-    
-    
+
+
     document.getElementById('map-address-search-button').addEventListener('click', function() {
       const address = document.getElementById('map-address-search').value;
       if (!address) return;
-      
-      
+
+
       fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`)
         .then(response => response.json())
         .then(data => {
@@ -160,15 +163,15 @@ block content
             const result = data[0];
             const lat = parseFloat(result.lat);
             const lng = parseFloat(result.lon);
-            
-            
+
+
             map.setView([lat, lng], 16);
-            
-            
+
+
             if (temporaryMarker) {
               map.removeLayer(temporaryMarker);
             }
-            
+
             temporaryMarker = L.marker([lat, lng], {
               icon: L.icon({
                 iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-yellow.png',
@@ -185,20 +188,20 @@ block content
                 <button id="create-here" style="padding: 5px 10px; background: #0077cc; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 5px;">Créer un spot ici</button>
               `)
               .openPopup();
-              
-            
+
+
             setTimeout(() => {
               const createButton = document.getElementById('create-here');
               if (createButton) {
                 createButton.addEventListener('click', function() {
-                  
+
                   document.getElementById('form-lat').value = lat;
                   document.getElementById('form-lng').value = lng;
-                  
-                  
+
+
                   document.getElementById('spot-form-overlay').style.display = 'block';
-                  
-                  
+
+
                   document.getElementById('address-search').value = result.display_name;
                 });
               }
@@ -212,19 +215,19 @@ block content
           alert('Erreur lors de la recherche d\'adresse');
         });
     });
-    
-    
+
+
     function handleCategoryChange() {
       const category = document.getElementById('form-category').value;
       const alertFields = document.getElementById('alert-fields');
-      
+
       if (category === 'alert') {
         alertFields.style.display = 'block';
       } else {
         alertFields.style.display = 'none';
       }
     }
-    
+
     fetch('/api/spots')
     .then(res => res.json())
     .then(spots => {
@@ -233,11 +236,11 @@ block content
           console.warn('Spot missing valid coordinates:', spot);
           return;
         }
-        
+
         const [lng, lat] = spot.coords.coordinates;
-        
+
         const icon = icons[spot.category] || icons.other;
-        
+
         const marker = L.marker([lat, lng], {icon: icon})
           .addTo(map)
           .bindPopup(`
@@ -249,13 +252,13 @@ block content
               `<a href="/alerts?spotId=${spot._id}" style="margin-left: 10px; color: #d9534f;">Voir alertes</a>` : 
               ''}
           `);
-        
+
         allMarkers.push({
           marker: marker,
           category: spot.category
         });
       });
-      
+
       if (allMarkers.length > 0) {
         const markerBounds = L.featureGroup(allMarkers.map(m => m.marker)).getBounds();
         map.fitBounds(markerBounds, { padding: [50, 50] });
@@ -267,7 +270,7 @@ block content
 
     document.getElementById('category-filter').addEventListener('change', function() {
       const selectedCategory = this.value;
-      
+
       allMarkers.forEach(item => {
         if (selectedCategory === 'all' || item.category === selectedCategory) {
           map.addLayer(item.marker);
@@ -276,18 +279,18 @@ block content
         }
       });
     });
-    
-    
+
+
     document.getElementById('user-location').addEventListener('click', function() {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(position => {
           const userLat = position.coords.latitude;
           const userLng = position.coords.longitude;
-          
-          
+
+
           map.setView([userLat, userLng], 15);
-          
-          
+
+
           L.marker([userLat, userLng], {
             icon: L.icon({
               iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-violet.png',
@@ -300,8 +303,8 @@ block content
           }).addTo(map)
             .bindPopup("Votre position")
             .openPopup();
-          
-          
+
+
           fetch(`/api/spots/nearby?lat=${userLat}&lng=${userLng}&distance=5`)
             .then(res => res.json())
             .then(nearbySpots => {
@@ -318,37 +321,37 @@ block content
         alert('La géolocalisation n\'est pas supportée par votre navigateur.');
       }
     });
-    
-    
+
+
     document.getElementById('toggle-add-mode').addEventListener('change', function() {
       addSpotMode = this.checked;
-      
+
       if (addSpotMode) {
         map.getContainer().style.cursor = 'crosshair';
       } else {
         map.getContainer().style.cursor = '';
-        
-        
+
+
         if (temporaryMarker) {
           map.removeLayer(temporaryMarker);
           temporaryMarker = null;
         }
       }
     });
-    
-    
+
+
     map.on('click', function(e) {
       if (!addSpotMode) return;
-      
+
       const clickedLat = e.latlng.lat;
       const clickedLng = e.latlng.lng;
-      
-      
+
+
       if (temporaryMarker) {
         map.removeLayer(temporaryMarker);
       }
-      
-      
+
+
       temporaryMarker = L.marker([clickedLat, clickedLng], {
         icon: L.icon({
           iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-orange.png',
@@ -359,47 +362,47 @@ block content
           shadowSize: [41, 41]
         })
       }).addTo(map);
-      
-      
+
+
       document.getElementById('form-lat').value = clickedLat;
       document.getElementById('form-lng').value = clickedLng;
-      
-      
+
+
       document.getElementById('spot-form-overlay').style.display = 'block';
     });
-    
-    
+
+
     document.querySelector('.cancel-button').addEventListener('click', function() {
-      
+
       document.getElementById('spot-form-overlay').style.display = 'none';
-      
-      
+
+
       if (temporaryMarker) {
         map.removeLayer(temporaryMarker);
         temporaryMarker = null;
       }
     });
-    
-    
+
+
     document.getElementById('new-spot-form').addEventListener('submit', function(e) {
       e.preventDefault();
-      
+
       const category = document.getElementById('form-category').value;
       const lat = parseFloat(document.getElementById('form-lat').value);
       const lng = parseFloat(document.getElementById('form-lng').value);
       const title = document.getElementById('form-title').value;
       const description = document.getElementById('form-description').value;
       const author = document.getElementById('form-author').value;
-      
-      
+
+
       if (isNaN(lat) || isNaN(lng)) {
         alert('Veuillez spécifier une position en utilisant la recherche d\'adresse');
         return;
       }
-      
-      
+
+
       if (category === 'alert') {
-        
+
         const spotData = {
           title: title,
           description: description,
@@ -408,8 +411,8 @@ block content
           lng: lng,
           author: author
         };
-        
-        
+
+
         fetch('/api/spots', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -420,7 +423,7 @@ block content
           return res.json();
         })
         .then(newSpot => {
-          
+
           const alertData = {
             spotId: newSpot._id,
             alertType: document.getElementById('alertType').value,
@@ -429,7 +432,7 @@ block content
               description: description
             }
           };
-          
+
           return fetch('/api/alerts', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -442,26 +445,26 @@ block content
           });
         })
         .then(result => {
-          
+
           document.getElementById('spot-form-overlay').style.display = 'none';
-          
-          
+
+
           if (temporaryMarker) {
             map.removeLayer(temporaryMarker);
             temporaryMarker = null;
           }
-          
-          
+
+
           const newSpot = result.spot;
-          
-          
+
+
           const spotCoordinates = newSpot.coords.coordinates;
           const spotLat = spotCoordinates[1];
           const spotLng = spotCoordinates[0];
-          
-          
+
+
           const icon = icons.alert;
-          
+
           const marker = L.marker([spotLat, spotLng], {icon: icon})
             .addTo(map)
             .bindPopup(`
@@ -472,17 +475,17 @@ block content
               <a href="/alerts?spotId=${newSpot._id}" style="margin-left: 10px; color: #d9534f;">Voir alertes</a>
             `)
             .openPopup();
-          
-          
+
+
           allMarkers.push({
             marker: marker,
             category: 'alert'
           });
-          
-          
+
+
           document.getElementById('new-spot-form').reset();
-          
-          
+
+
           alert('Alerte ajoutée avec succès!');
         })
         .catch(err => {
@@ -490,7 +493,7 @@ block content
           alert('Erreur lors de l\'ajout de l\'alerte. Veuillez réessayer.');
         });
       } else {
-        
+
         const spotData = {
           title: title,
           description: description,
@@ -499,7 +502,7 @@ block content
           lng: lng,
           author: author
         };
-        
+
         fetch('/api/spots', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -510,23 +513,23 @@ block content
           return res.json();
         })
         .then(newSpot => {
-          
+
           document.getElementById('spot-form-overlay').style.display = 'none';
-          
-          
+
+
           if (temporaryMarker) {
             map.removeLayer(temporaryMarker);
             temporaryMarker = null;
           }
-          
-          
+
+
           const spotCoordinates = newSpot.coords.coordinates;
           const spotLat = spotCoordinates[1]; 
           const spotLng = spotCoordinates[0];
-          
-          
+
+
           const icon = icons[category] || icons.other;
-          
+
           const marker = L.marker([spotLat, spotLng], {icon: icon})
             .addTo(map)
             .bindPopup(`
@@ -536,17 +539,17 @@ block content
               <a href="/spots/${newSpot._id}">Voir détails</a>
             `)
             .openPopup();
-          
-          
+
+
           allMarkers.push({
             marker: marker,
             category: newSpot.category
           });
-          
-          
+
+
           document.getElementById('new-spot-form').reset();
-          
-          
+
+
           alert('Spot ajouté avec succès!');
         })
         .catch(err => {
@@ -555,42 +558,42 @@ block content
         });
       }
     });
-    
-    
+
+
     document.getElementById('severity').addEventListener('input', function() {
       document.getElementById('severity-value').textContent = this.value;
     });
-    
-    
+
+
     document.getElementById('show-map-help').addEventListener('click', function() {
       alert('Pour ajouter un nouveau spot ou une alerte:\n\n1. Utilisez la barre de recherche pour trouver un lieu, puis cliquez sur "Créer un spot ici"\n\nOU\n\n2. Activez le mode "Ajout de spot" puis cliquez directement sur la carte');
     });
-  
+
     function checkForSpotHighlight() {
     const hash = window.location.hash;
     if (hash && hash.startsWith('#spot=')) {
       const spotId = hash.substring(6);
-      
-      
+
+
       fetch(`/api/spots/${spotId}`)
         .then(res => {
           if (!res.ok) throw new Error('Spot not found');
           return res.json();
         })
         .then(spot => {
-          
+
           map.setView([spot.coords.lat, spot.coords.lng], 17);
-          
-          
+
+
           const foundMarker = allMarkers.find(item => {
             return item.marker.getPopup().getContent().includes(spotId);
           });
-          
+
           if (foundMarker) {
-            
+
             foundMarker.marker.openPopup();
-            
-            
+
+
             const highlightCircle = L.circleMarker([spot.coords.lat, spot.coords.lng], {
               color: '#f39c12',
               fillColor: '#f39c12',
@@ -598,7 +601,7 @@ block content
               radius: 20,
               weight: 2
             }).addTo(map);
-            
+
             let growing = true;
             const pulseAnimation = setInterval(() => {
               if (growing) {
@@ -609,7 +612,7 @@ block content
                 if (highlightCircle.getRadius() <= 20) growing = true;
               }
             }, 50);
-            
+
             setTimeout(() => {
               clearInterval(pulseAnimation);
               map.removeLayer(highlightCircle);

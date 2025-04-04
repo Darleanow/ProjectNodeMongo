@@ -4,13 +4,13 @@ block content
   h2 Ajouter un spot ou une alerte
 
   .form-container
-    form#unified-form(method='POST', action='/api/spots')
-      input#form-lat(type='hidden', name='lat')
-      input#form-lng(type='hidden', name='lng')
+    form#unified-form(method='POST' action='/api/spots')
+      input#form-lat(type='hidden' name='lat')
+      input#form-lng(type='hidden' name='lng')
 
       .form-group
         label(for='form-title') Titre:
-        input#form-title(type='text', name='title', required)
+        input#form-title(type='text' name='title', required)
 
       .form-group
         label(for='form-description') Description:
@@ -36,15 +36,15 @@ block content
 
         .form-group
           label(for='severity') Niveau de sévérité (1–5):
-          input#severity(type='range', name='severity', min='1', max='5', value='3')
+          input#severity(type='range' name='severity' min='1' max='5' value='3')
           span#severity-value 3
 
       .form-group
         label(for='address-search') Recherche par adresse:
-        input#address-search(type='text', placeholder='Entrez une adresse')
+        input#address-search(type='text' placeholder='Entrez une adresse')
         button#search-button(type='button') Rechercher
 
-      input#form-author(type='hidden', name='author', value='645f340dca190f342a2ebb55')
+      input#form-author(type='hidden' name='author' value='645f340dca190f342a2ebb55')
 
       .form-actions
         button#submit-button(type='submit') Ajouter

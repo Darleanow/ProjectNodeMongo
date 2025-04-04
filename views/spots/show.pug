@@ -5,7 +5,7 @@ block content
     // Spot information section
     .spot-info(style="margin-bottom: 30px;")
       h2= spot.title
-      
+
       .spot-metadata(style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;")
         span.category(style=`display: inline-block; padding: 4px 8px; border-radius: 4px; background-color: ${
           spot.category === 'good-place' ? '#48bb78' : 
@@ -13,31 +13,31 @@ block content
           spot.category === 'event' ? '#4299e1' : 
           '#718096'
         }; color: white;`)= spot.category.charAt(0).toUpperCase() + spot.category.slice(1).replace('-', ' ')
-        
+
         if spot.updatedAt
           span.date(style="color: #718096; font-size: 0.9em;") Mis à jour le #{new Date(spot.updatedAt).toLocaleDateString()}
-      
+
       .description
         p= spot.description
-      
+
       .coordinates(style="margin: 15px 0; color: #718096;")
         p 
           strong Coordonnées: 
           | Longitude: #{spot.coords.coordinates[0].toFixed(6)}, Latitude: #{spot.coords.coordinates[1].toFixed(6)}
-    
+
     // Map section
     .map-section
       h3 Localisation sur la carte
-      
+
       #spot-map(style="height: 400px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);")
-    
+
     // Actions section
     .actions(style="display: flex; gap: 15px; margin-top: 25px;")
-      a.back-button(href="/spots", style="padding: 8px 15px; background-color: #718096; color: white; text-decoration: none; border-radius: 4px;") Retour à la liste
-      
+      a.back-button(href="/spots" style="padding: 8px 15px; background-color: #718096; color: white; text-decoration: none; border-radius: 4px;") Retour à la liste
+
       if spot.category === 'alert'
         a.alerts-button(href=`/alerts?spotId=${spot._id}`, style="padding: 8px 15px; background-color: #f56565; color: white; text-decoration: none; border-radius: 4px;") Voir les alertes
-      
+
       a.view-on-map-button(href=`/map#spot=${spot._id}`, style="padding: 8px 15px; background-color: #4299e1; color: white; text-decoration: none; border-radius: 4px;") Voir sur la carte principale
 
   script.
@@ -48,21 +48,21 @@ block content
       const lat = #{spot.coords.coordinates[1]};
       const spotTitle = "#{spot.title}";
       const spotCategory = "#{spot.category}";
-      
+
       // Initialize map centered on the spot location
       const map = L.map('spot-map').setView([lat, lng], 15);
-      
+
       // Add OpenStreetMap tiles
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       }).addTo(map);
-      
+
       // Custom icon based on category
       const iconUrl = spotCategory === 'good-place' ? 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png' :
-                      spotCategory === 'alert' ? 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png' :
-                      spotCategory === 'event' ? 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png' :
-                      'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-grey.png';
-      
+        spotCategory === 'alert' ? 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png' :
+        spotCategory === 'event' ? 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png' :
+        'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-grey.png';
+
       const icon = L.icon({
         iconUrl: iconUrl,
         iconSize: [25, 41],
@@ -71,38 +71,38 @@ block content
         shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
         shadowSize: [41, 41]
       });
-      
+
       // Add marker for the spot
       L.marker([lat, lng], { icon: icon })
         .addTo(map)
         .bindPopup(`<strong>${spotTitle}</strong><br>Catégorie: ${spotCategory}`);
-      
+
       // Add a circle to indicate approximate area
       L.circle([lat, lng], {
-        color: 'rgba(52, 152, 219, 0.3)',
-        fillColor: 'rgba(52, 152, 219, 0.1)',
+        color: 'rgba(52, 152, 219, 0.3)' 
+        fillColor: 'rgba(52, 152, 219, 0.1)' 
         fillOpacity: 0.5,
         radius: 150 // 150 meters radius
       }).addTo(map);
-      
+
       // Add nearby spots if any
       fetch(`/api/spots/nearby?lat=${lat}&lng=${lng}&distance=0.5`)
         .then(res => res.json())
         .then(nearbySpots => {
           // Filter out the current spot
           const otherSpots = nearbySpots.filter(spot => spot._id !== "#{spot._id}");
-          
+
           if (otherSpots.length > 0) {
             otherSpots.forEach(nearbySpot => {
               // Get coordinates from GeoJSON format
               const [nearbyLng, nearbyLat] = nearbySpot.coords.coordinates;
-              
+
               // Custom icon based on nearby spot category
               const nearbyIconUrl = nearbySpot.category === 'good-place' ? 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png' :
-                                  nearbySpot.category === 'alert' ? 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png' :
-                                  nearbySpot.category === 'event' ? 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png' :
-                                  'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-grey.png';
-              
+                nearbySpot.category === 'alert' ? 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png' :
+                nearbySpot.category === 'event' ? 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png' :
+                'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-grey.png';
+
               const nearbyIcon = L.icon({
                 iconUrl: nearbyIconUrl,
                 iconSize: [25, 41],
@@ -112,7 +112,7 @@ block content
                 shadowSize: [41, 41],
                 opacity: 0.7
               });
-              
+
               L.marker([nearbyLat, nearbyLng], { icon: nearbyIcon, opacity: 0.7 })
                 .addTo(map)
                 .bindPopup(`
@@ -126,7 +126,7 @@ block content
         .catch(err => {
           console.error('Error loading nearby spots:', err);
         });
-      
+
       // Add street name if available
       fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`)
         .then(res => res.json())
@@ -134,7 +134,7 @@ block content
           if (data && data.display_name) {
             // Add an info box with the address
             const addressInfo = L.control({position: 'bottomleft'});
-            
+
             addressInfo.onAdd = function(map) {
               const div = L.DomUtil.create('div', 'address-info');
               div.style.background = 'white';
@@ -146,7 +146,7 @@ block content
               div.innerHTML = `<strong>Adresse:</strong> ${data.display_name}`;
               return div;
             };
-            
+
             addressInfo.addTo(map);
           }
         })

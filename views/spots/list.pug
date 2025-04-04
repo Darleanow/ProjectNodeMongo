@@ -2,7 +2,7 @@ extends ../layout
 
 block content
   h2= title
-  
+
   p.intro Pour ajouter un nouveau spot, utilisez la 
     a(href="/map") carte interactive
     | . Cliquez sur l'emplacement désiré ou utilisez la barre de recherche.
@@ -62,24 +62,24 @@ block content
       const modalOverlay = document.querySelector('.modal-overlay');
       const cancelBtn = document.querySelector('.cancel-btn');
       const confirmBtn = document.querySelector('.confirm-btn');
-      
+
       let spotIdToDelete = null;
-      
+
       deleteButtons.forEach(button => {
         button.addEventListener('click', () => {
           spotIdToDelete = button.getAttribute('data-id');
           modalOverlay.style.display = 'block';
         });
       });
-      
+
       cancelBtn.addEventListener('click', () => {
         modalOverlay.style.display = 'none';
         spotIdToDelete = null;
       });
-      
+
       confirmBtn.addEventListener('click', async () => {
         if (!spotIdToDelete) return;
-        
+
         try {
           const response = await fetch(`/api/spots/${spotIdToDelete}`, {
             method: 'DELETE',
@@ -87,14 +87,14 @@ block content
               'Content-Type': 'application/json'
             }
           });
-          
+
           if (response.ok) {
             const spotElement = document.querySelector(`.delete-btn[data-id="${spotIdToDelete}"]`).closest('.spot-item');
             spotElement.remove();
-            
+
             modalOverlay.style.display = 'none';
             spotIdToDelete = null;
-            
+
             alert('Spot supprimé avec succès');
           } else {
             throw new Error(`Server responded with status: ${response.status}`);
