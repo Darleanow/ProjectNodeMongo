@@ -225,50 +225,46 @@ block content
       }
     }
     
-    
     fetch('/api/spots')
-      .then(res => res.json())
-      .then(spots => {
-        spots.forEach(spot => {
-          
-          if (!spot.coords || (!spot.coords.lat && !spot.coords.lng)) {
-            console.warn('Spot missing coordinates:', spot);
-            return;
-          }
-          
-          
-          const icon = icons[spot.category] || icons.other;
-          
-          const marker = L.marker([spot.coords.lat, spot.coords.lng], {icon: icon})
-            .addTo(map)
-            .bindPopup(`
-              <h3>${spot.title}</h3>
-              <p>${spot.description}</p>
-              <p><small>Catégorie: ${spot.category}</small></p>
-              <a href="/spots/${spot._id}">Voir détails</a>
-              ${spot.category === 'alert' ? 
-                `<a href="/alerts?spotId=${spot._id}" style="margin-left: 10px; color: #d9534f;">Voir alertes</a>` : 
-                ''}
-            `);
-          
-          
-          allMarkers.push({
-            marker: marker,
-            category: spot.category
-          });
-        });
-        
-        
-        if (allMarkers.length > 0) {
-          const markerBounds = L.featureGroup(allMarkers.map(m => m.marker)).getBounds();
-          map.fitBounds(markerBounds, { padding: [50, 50] });
+    .then(res => res.json())
+    .then(spots => {
+      spots.forEach(spot => {
+        if (!spot.coords || !spot.coords.coordinates || !Array.isArray(spot.coords.coordinates) || spot.coords.coordinates.length !== 2) {
+          console.warn('Spot missing valid coordinates:', spot);
+          return;
         }
-      })
-      .catch(err => {
-        console.error('Error loading spots:', err);
+        
+        const [lng, lat] = spot.coords.coordinates;
+        
+        const icon = icons[spot.category] || icons.other;
+        
+        const marker = L.marker([lat, lng], {icon: icon})
+          .addTo(map)
+          .bindPopup(`
+            <h3>${spot.title}</h3>
+            <p>${spot.description}</p>
+            <p><small>Catégorie: ${spot.category}</small></p>
+            <a href="/spots/${spot._id}">Voir détails</a>
+            ${spot.category === 'alert' ? 
+              `<a href="/alerts?spotId=${spot._id}" style="margin-left: 10px; color: #d9534f;">Voir alertes</a>` : 
+              ''}
+          `);
+        
+        allMarkers.push({
+          marker: marker,
+          category: spot.category
+        });
       });
-    
-    
+      
+      if (allMarkers.length > 0) {
+        const markerBounds = L.featureGroup(allMarkers.map(m => m.marker)).getBounds();
+        map.fitBounds(markerBounds, { padding: [50, 50] });
+      }
+    })
+    .catch(err => {
+      console.error('Error loading spots:', err);
+    });    
+
     document.getElementById('category-filter').addEventListener('change', function() {
       const selectedCategory = this.value;
       
@@ -459,8 +455,9 @@ block content
           const newSpot = result.spot;
           
           
-          const spotLat = newSpot.coords ? newSpot.coords.lat : newSpot.lat;
-          const spotLng = newSpot.coords ? newSpot.coords.lng : newSpot.lng;
+          const spotCoordinates = newSpot.coords.coordinates;
+          const spotLat = spotCoordinates[1];
+          const spotLng = spotCoordinates[0];
           
           
           const icon = icons.alert;
@@ -523,8 +520,9 @@ block content
           }
           
           
-          const spotLat = newSpot.coords ? newSpot.coords.lat : newSpot.lat;
-          const spotLng = newSpot.coords ? newSpot.coords.lng : newSpot.lng;
+          const spotCoordinates = newSpot.coords.coordinates;
+          const spotLat = spotCoordinates[1]; 
+          const spotLng = spotCoordinates[0];
           
           
           const icon = icons[category] || icons.other;

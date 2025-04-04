@@ -5,8 +5,8 @@ export interface ISpot extends Document {
   description: string
   category: 'good-place' | 'alert' | 'event' | 'other'
   coords: {
-    lat: number
-    lng: number
+    type: string
+    coordinates: [number, number]
   }
   author: Types.ObjectId
   createdAt: Date
@@ -30,12 +30,14 @@ const spotSchema = new Schema<ISpot>(
       required: true
     },
     coords: {
-      lat: {
-        type: Number,
+      type: {
+        type: String,
+        enum: ['Point'],
+        default: 'Point',
         required: true
       },
-      lng: {
-        type: Number,
+      coordinates: {
+        type: [Number],
         required: true
       }
     },

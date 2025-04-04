@@ -23,7 +23,7 @@ block content
       .coordinates(style="margin: 15px 0; color: #718096;")
         p 
           strong Coordonnées: 
-          | Latitude: #{spot.coords.lat.toFixed(6)}, Longitude: #{spot.coords.lng.toFixed(6)}
+          | Longitude: #{spot.coords.coordinates[0].toFixed(6)}, Latitude: #{spot.coords.coordinates[1].toFixed(6)}
     
     // Map section
     .map-section
@@ -43,9 +43,9 @@ block content
   script.
     // Initialize the spot map
     document.addEventListener('DOMContentLoaded', function() {
-      // Get coordinates from the spot data
-      const lat = #{spot.coords.lat};
-      const lng = #{spot.coords.lng};
+      // Get coordinates from the spot data (GeoJSON format [lng, lat])
+      const lng = #{spot.coords.coordinates[0]};
+      const lat = #{spot.coords.coordinates[1]};
       const spotTitle = "#{spot.title}";
       const spotCategory = "#{spot.category}";
       
@@ -59,9 +59,9 @@ block content
       
       // Custom icon based on category
       const iconUrl = spotCategory === 'good-place' ? 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png' :
-                     spotCategory === 'alert' ? 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png' :
-                     spotCategory === 'event' ? 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png' :
-                     'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-grey.png';
+                      spotCategory === 'alert' ? 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png' :
+                      spotCategory === 'event' ? 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png' :
+                      'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-grey.png';
       
       const icon = L.icon({
         iconUrl: iconUrl,
@@ -94,11 +94,14 @@ block content
           
           if (otherSpots.length > 0) {
             otherSpots.forEach(nearbySpot => {
+              // Get coordinates from GeoJSON format
+              const [nearbyLng, nearbyLat] = nearbySpot.coords.coordinates;
+              
               // Custom icon based on nearby spot category
               const nearbyIconUrl = nearbySpot.category === 'good-place' ? 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png' :
-                                   nearbySpot.category === 'alert' ? 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png' :
-                                   nearbySpot.category === 'event' ? 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png' :
-                                   'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-grey.png';
+                                  nearbySpot.category === 'alert' ? 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png' :
+                                  nearbySpot.category === 'event' ? 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png' :
+                                  'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-grey.png';
               
               const nearbyIcon = L.icon({
                 iconUrl: nearbyIconUrl,
@@ -110,7 +113,7 @@ block content
                 opacity: 0.7
               });
               
-              L.marker([nearbySpot.coords.lat, nearbySpot.coords.lng], { icon: nearbyIcon, opacity: 0.7 })
+              L.marker([nearbyLat, nearbyLng], { icon: nearbyIcon, opacity: 0.7 })
                 .addTo(map)
                 .bindPopup(`
                   <strong>${nearbySpot.title}</strong><br>
@@ -151,4 +154,4 @@ block content
           console.error('Error fetching address:', err);
           // Silently fail, as this is just an enhancement
         });
-    });
+    );

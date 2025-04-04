@@ -28,13 +28,18 @@ export const getSpotById = async (req: Request, res: Response): Promise<void> =>
 export const createSpot = async (req: Request, res: Response): Promise<void> => {
   try {
     const { title, description, category, lat, lng, author } = req.body
+    
     const newSpot = new Spot({
       title,
       description,
       category,
-      coords: { lat, lng },
+      coords: {
+        type: 'Point',
+        coordinates: [parseFloat(lng), parseFloat(lat)]
+      },
       author
     })
+    
     const spot = await newSpot.save()
     res.json(spot)
   } catch (err) {
@@ -51,7 +56,7 @@ export const updateSpot = async (req: Request, res: Response): Promise<void> => 
       title: string
       description: string
       category: string
-      coords: { lat: number; lng: number }
+      coords: { type: string; coordinates: [number, number] }
       updatedAt: Date
     }> = {
       updatedAt: new Date()
@@ -60,7 +65,12 @@ export const updateSpot = async (req: Request, res: Response): Promise<void> => 
     if (title) spotFields.title = title
     if (description) spotFields.description = description
     if (category) spotFields.category = category
-    if (lat && lng) spotFields.coords = { lat, lng }
+    if (lat && lng) {
+      spotFields.coords = {
+        type: 'Point',
+        coordinates: [parseFloat(lng), parseFloat(lat)]
+      }
+    }
 
     const spot = await Spot.findByIdAndUpdate(req.params.id, { $set: spotFields }, { new: true })
 
