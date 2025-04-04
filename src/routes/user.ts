@@ -3,6 +3,13 @@ import User from '../models/User.js'
 
 const router = express.Router()
 
+/**
+ * GET /api/users
+ * → Retrieve all registered users.
+ *
+ * POST /api/users
+ * → Create a new user with name and email.
+ */
 router.get('/', async (req, res) => {
     try {
         const users = await User.find()
