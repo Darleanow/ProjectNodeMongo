@@ -1,5 +1,3 @@
-// ------------------ SERVER CLEAN SETUP ------------------
-
 import 'dotenv/config'
 import express from 'express'
 import bodyParser from 'body-parser'
