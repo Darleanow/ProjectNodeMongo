@@ -1,0 +1,6 @@
+extends ../layout
+
+block content
+  h2= spot.title
+  p= spot.description
+  p Latitude: #{spot.coords.lat}, Longitude: #{spot.coords.lng}

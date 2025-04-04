@@ -1,0 +1,10 @@
+extends ../layout
+
+block content
+  h2 Ajouter un nouveau spot
+  form(method='POST', action='/spots')
+    input(type='text', name='title', placeholder='Titre')
+    textarea(name='description', placeholder='Description')
+    input(type='text', name='lat', placeholder='Latitude')
+    input(type='text', name='lng', placeholder='Longitude')
+    button(type='submit') Envoyer

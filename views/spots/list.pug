@@ -1,0 +1,9 @@
+extends ../layout
+
+block content
+  h2= title
+
+  ul
+    each spot in spots
+      li
+        a(href=`/spots/${spot._id}`)= spot.title
