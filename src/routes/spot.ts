@@ -9,7 +9,7 @@ import {
   renderSpotsList,
   renderSpotDetail,
   renderSpotCreationForm
-} from '@/controllers/spot-controller'
+} from '../controllers/spot-controller.js'
 
 const router = express.Router()
 

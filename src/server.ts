@@ -30,6 +30,7 @@ connectDB()
 
 // Routes
 app.get('/', (req, res) => res.render('index', { title: 'Accueil' }))
+app.get('/map', (req, res) => res.render('map', { title: 'Carte' }))
 
 // Main routes
 app.use(spotRoutes)

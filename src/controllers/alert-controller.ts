@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
-import AlertTimeSeries from '@/models/AlertTimeSeries'
-import Spot from '@/models/Spot'
+import AlertTimeSeries from '../models/AlertTimeSeries.js'
+import Spot from '../models/Spot.js'
 
 // Create a new alert
 export const createAlert = async (req: Request, res: Response) => {

@@ -6,7 +6,7 @@ import {
   getAlertsByTimeRange,
   getAlertsAggregation,
   renderAlertsPage
-} from '@/controllers/alert-controller'
+} from '../controllers/alert-controller.js'
 
 const router = express.Router()
 
