@@ -1,6 +1,7 @@
 # Project Node Mongo
 
-#### Available Scripts
+## Available Scripts
+
 ```
 
 - `tsc' - builds the tsc project to the dist folder
