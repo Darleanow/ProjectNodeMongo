@@ -2,6 +2,10 @@ extends ../layout
 
 block content
   h2= title
+  
+  p.intro Pour ajouter un nouveau spot, utilisez la 
+    a(href="/map") carte interactive
+    | . Cliquez sur l'emplacement désiré ou utilisez la barre de recherche.
 
   ul
     each spot in spots

@@ -81,19 +81,19 @@ block content
           button.cancel-button(type="button", style="padding: 8px 15px; background-color: #6c757d; color: white; border: none; border-radius: 4px;") Annuler
           button.submit-button(type="submit", style="padding: 8px 15px; background-color: #0077cc; color: white; border: none; border-radius: 4px;") Ajouter
   
-  .spot-actions(style="margin-top: 15px; text-align: right;")
-    a.button(href="/spots/create", style="padding: 8px 15px; background-color: #0077cc; color: white; text-decoration: none; border-radius: 4px;") Ajouter un spot
+  .spot-actions(style="margin-top: 15px; text-align: center;")
+    button#show-map-help(style="padding: 8px 15px; background-color: #0077cc; color: white; border: none; border-radius: 4px; cursor: pointer;") Comment ajouter du contenu
   
   script(src="/js/address-search.js")
   script.
-    // Initialize map centered on Paris
+    
     const map = L.map('map').setView([48.85, 2.35], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
     
-    // Store all markers for filtering
+    
     let allMarkers = [];
     
-    // Custom icons based on category
+    
     const icons = {
       'good-place': L.icon({
         iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
@@ -129,17 +129,17 @@ block content
       })
     };
     
-    // Add spot mode variables
+    
     let addSpotMode = false;
     let temporaryMarker = null;
     
-    // Initialize address search for map
+    
     const mapAddressSearch = new AddressSearch({
       inputSelector: '#map-address-search',
       resultSelector: '#map-address-results'
     });
     
-    // Address search for form
+    
     const formAddressSearch = new AddressSearch({
       inputSelector: '#address-search',
       resultSelector: '#address-results',
@@ -147,12 +147,12 @@ block content
       lngInputSelector: '#form-lng'
     });
     
-    // Handle address search button click
+    
     document.getElementById('map-address-search-button').addEventListener('click', function() {
       const address = document.getElementById('map-address-search').value;
       if (!address) return;
       
-      // Use Nominatim API (OpenStreetMap) for geocoding
+      
       fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`)
         .then(response => response.json())
         .then(data => {
@@ -161,10 +161,10 @@ block content
             const lat = parseFloat(result.lat);
             const lng = parseFloat(result.lon);
             
-            // Center map on found location
+            
             map.setView([lat, lng], 16);
             
-            // Add temporary marker
+            
             if (temporaryMarker) {
               map.removeLayer(temporaryMarker);
             }
@@ -186,19 +186,19 @@ block content
               `)
               .openPopup();
               
-            // Add event listener to popup content after it's added to the DOM
+            
             setTimeout(() => {
               const createButton = document.getElementById('create-here');
               if (createButton) {
                 createButton.addEventListener('click', function() {
-                  // Set form coordinates
+                  
                   document.getElementById('form-lat').value = lat;
                   document.getElementById('form-lng').value = lng;
                   
-                  // Show the form
+                  
                   document.getElementById('spot-form-overlay').style.display = 'block';
                   
-                  // Pre-fill address field
+                  
                   document.getElementById('address-search').value = result.display_name;
                 });
               }
@@ -213,7 +213,7 @@ block content
         });
     });
     
-    // Function to handle category change in form
+    
     function handleCategoryChange() {
       const category = document.getElementById('form-category').value;
       const alertFields = document.getElementById('alert-fields');
@@ -225,18 +225,18 @@ block content
       }
     }
     
-    // Load spots from API
+    
     fetch('/api/spots')
       .then(res => res.json())
       .then(spots => {
         spots.forEach(spot => {
-          // Ensure we have valid coordinates
+          
           if (!spot.coords || (!spot.coords.lat && !spot.coords.lng)) {
             console.warn('Spot missing coordinates:', spot);
             return;
           }
           
-          // Create marker with custom icon based on category
+          
           const icon = icons[spot.category] || icons.other;
           
           const marker = L.marker([spot.coords.lat, spot.coords.lng], {icon: icon})
@@ -251,14 +251,14 @@ block content
                 ''}
             `);
           
-          // Store marker with its category for filtering
+          
           allMarkers.push({
             marker: marker,
             category: spot.category
           });
         });
         
-        // Auto-fit map to show all markers if we have any
+        
         if (allMarkers.length > 0) {
           const markerBounds = L.featureGroup(allMarkers.map(m => m.marker)).getBounds();
           map.fitBounds(markerBounds, { padding: [50, 50] });
@@ -268,7 +268,7 @@ block content
         console.error('Error loading spots:', err);
       });
     
-    // Filter markers by category
+    
     document.getElementById('category-filter').addEventListener('change', function() {
       const selectedCategory = this.value;
       
@@ -281,17 +281,17 @@ block content
       });
     });
     
-    // Use user's current location
+    
     document.getElementById('user-location').addEventListener('click', function() {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(position => {
           const userLat = position.coords.latitude;
           const userLng = position.coords.longitude;
           
-          // Center map on user location
+          
           map.setView([userLat, userLng], 15);
           
-          // Add a special marker for user location
+          
           L.marker([userLat, userLng], {
             icon: L.icon({
               iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-violet.png',
@@ -305,7 +305,7 @@ block content
             .bindPopup("Votre position")
             .openPopup();
           
-          // Load nearby spots
+          
           fetch(`/api/spots/nearby?lat=${userLat}&lng=${userLng}&distance=5`)
             .then(res => res.json())
             .then(nearbySpots => {
@@ -323,7 +323,7 @@ block content
       }
     });
     
-    // Toggle add spot mode
+    
     document.getElementById('toggle-add-mode').addEventListener('change', function() {
       addSpotMode = this.checked;
       
@@ -332,7 +332,7 @@ block content
       } else {
         map.getContainer().style.cursor = '';
         
-        // Remove temporary marker if it exists
+        
         if (temporaryMarker) {
           map.removeLayer(temporaryMarker);
           temporaryMarker = null;
@@ -340,19 +340,19 @@ block content
       }
     });
     
-    // Handle map click to add a spot
+    
     map.on('click', function(e) {
       if (!addSpotMode) return;
       
       const clickedLat = e.latlng.lat;
       const clickedLng = e.latlng.lng;
       
-      // Remove previous temporary marker if it exists
+      
       if (temporaryMarker) {
         map.removeLayer(temporaryMarker);
       }
       
-      // Add a temporary marker
+      
       temporaryMarker = L.marker([clickedLat, clickedLng], {
         icon: L.icon({
           iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-orange.png',
@@ -364,27 +364,27 @@ block content
         })
       }).addTo(map);
       
-      // Set form values
+      
       document.getElementById('form-lat').value = clickedLat;
       document.getElementById('form-lng').value = clickedLng;
       
-      // Show form overlay
+      
       document.getElementById('spot-form-overlay').style.display = 'block';
     });
     
-    // Cancel button handler
+    
     document.querySelector('.cancel-button').addEventListener('click', function() {
-      // Hide form overlay
+      
       document.getElementById('spot-form-overlay').style.display = 'none';
       
-      // Remove temporary marker
+      
       if (temporaryMarker) {
         map.removeLayer(temporaryMarker);
         temporaryMarker = null;
       }
     });
     
-    // Form submission handler
+    
     document.getElementById('new-spot-form').addEventListener('submit', function(e) {
       e.preventDefault();
       
@@ -395,15 +395,15 @@ block content
       const description = document.getElementById('form-description').value;
       const author = document.getElementById('form-author').value;
       
-      // Ensure we have coordinates
+      
       if (isNaN(lat) || isNaN(lng)) {
         alert('Veuillez spécifier une position en utilisant la recherche d\'adresse');
         return;
       }
       
-      // Different handling based on category
+      
       if (category === 'alert') {
-        // First create a spot for the alert location
+        
         const spotData = {
           title: title,
           description: description,
@@ -413,7 +413,7 @@ block content
           author: author
         };
         
-        // Submit spot first
+        
         fetch('/api/spots', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -424,7 +424,7 @@ block content
           return res.json();
         })
         .then(newSpot => {
-          // Now create the alert linked to this spot
+          
           const alertData = {
             spotId: newSpot._id,
             alertType: document.getElementById('alertType').value,
@@ -446,23 +446,23 @@ block content
           });
         })
         .then(result => {
-          // Hide form overlay
+          
           document.getElementById('spot-form-overlay').style.display = 'none';
           
-          // Remove temporary marker
+          
           if (temporaryMarker) {
             map.removeLayer(temporaryMarker);
             temporaryMarker = null;
           }
           
-          // Get spot from result
+          
           const newSpot = result.spot;
           
-          // Get coordinates
+          
           const spotLat = newSpot.coords ? newSpot.coords.lat : newSpot.lat;
           const spotLng = newSpot.coords ? newSpot.coords.lng : newSpot.lng;
           
-          // Add marker for the new spot
+          
           const icon = icons.alert;
           
           const marker = L.marker([spotLat, spotLng], {icon: icon})
@@ -476,16 +476,16 @@ block content
             `)
             .openPopup();
           
-          // Add to markers array for filtering
+          
           allMarkers.push({
             marker: marker,
             category: 'alert'
           });
           
-          // Reset form
+          
           document.getElementById('new-spot-form').reset();
           
-          // Show success message
+          
           alert('Alerte ajoutée avec succès!');
         })
         .catch(err => {
@@ -493,7 +493,7 @@ block content
           alert('Erreur lors de l\'ajout de l\'alerte. Veuillez réessayer.');
         });
       } else {
-        // Regular spot creation
+        
         const spotData = {
           title: title,
           description: description,
@@ -513,20 +513,20 @@ block content
           return res.json();
         })
         .then(newSpot => {
-          // Hide form overlay
+          
           document.getElementById('spot-form-overlay').style.display = 'none';
           
-          // Remove temporary marker
+          
           if (temporaryMarker) {
             map.removeLayer(temporaryMarker);
             temporaryMarker = null;
           }
           
-          // Get coordinates
+          
           const spotLat = newSpot.coords ? newSpot.coords.lat : newSpot.lat;
           const spotLng = newSpot.coords ? newSpot.coords.lng : newSpot.lng;
           
-          // Add marker for the new spot
+          
           const icon = icons[category] || icons.other;
           
           const marker = L.marker([spotLat, spotLng], {icon: icon})
@@ -539,16 +539,16 @@ block content
             `)
             .openPopup();
           
-          // Add to markers array for filtering
+          
           allMarkers.push({
             marker: marker,
             category: newSpot.category
           });
           
-          // Reset form
+          
           document.getElementById('new-spot-form').reset();
           
-          // Show success message
+          
           alert('Spot ajouté avec succès!');
         })
         .catch(err => {
@@ -558,36 +558,41 @@ block content
       }
     });
     
-    // Update severity display when the slider changes
+    
     document.getElementById('severity').addEventListener('input', function() {
       document.getElementById('severity-value').textContent = this.value;
-    }); 
+    });
+    
+    
+    document.getElementById('show-map-help').addEventListener('click', function() {
+      alert('Pour ajouter un nouveau spot ou une alerte:\n\n1. Utilisez la barre de recherche pour trouver un lieu, puis cliquez sur "Créer un spot ici"\n\nOU\n\n2. Activez le mode "Ajout de spot" puis cliquez directement sur la carte');
+    });
   
     function checkForSpotHighlight() {
     const hash = window.location.hash;
     if (hash && hash.startsWith('#spot=')) {
       const spotId = hash.substring(6);
       
-      // Find the spot in the loaded spots
+      
       fetch(`/api/spots/${spotId}`)
         .then(res => {
           if (!res.ok) throw new Error('Spot not found');
           return res.json();
         })
         .then(spot => {
-          // Center map on this spot
+          
           map.setView([spot.coords.lat, spot.coords.lng], 17);
           
-          // Find the marker for this spot
+          
           const foundMarker = allMarkers.find(item => {
             return item.marker.getPopup().getContent().includes(spotId);
           });
           
           if (foundMarker) {
-            // Open the popup for this marker
+            
             foundMarker.marker.openPopup();
             
-            // Add a highlight effect (pulsing circle)
+            
             const highlightCircle = L.circleMarker([spot.coords.lat, spot.coords.lng], {
               color: '#f39c12',
               fillColor: '#f39c12',
@@ -596,7 +601,6 @@ block content
               weight: 2
             }).addTo(map);
             
-            // Create pulsing animation
             let growing = true;
             const pulseAnimation = setInterval(() => {
               if (growing) {
@@ -608,7 +612,6 @@ block content
               }
             }, 50);
             
-            // Stop animation after 5 seconds
             setTimeout(() => {
               clearInterval(pulseAnimation);
               map.removeLayer(highlightCircle);
@@ -621,10 +624,8 @@ block content
     }
     }
 
-    // Run highlight check when map is ready
     map.whenReady(() => {
-      setTimeout(checkForSpotHighlight, 1000); // Delay to ensure markers are loaded
+      setTimeout(checkForSpotHighlight, 1000);
     });
 
-    // Listen for hash changes
     window.addEventListener('hashchange', checkForSpotHighlight);

@@ -7,8 +7,7 @@ import {
   deleteSpot,
   findSpotsByDistance,
   renderSpotsList,
-  renderSpotDetail,
-  renderSpotCreationForm
+  renderSpotDetail
 } from '@/controllers/spot-controller.js'
 
 const router = express.Router()
@@ -21,8 +20,6 @@ router.put('/api/spots/:id', updateSpot)
 router.delete('/api/spots/:id', deleteSpot)
 
 router.get('/spots', renderSpotsList)
-router.get('/spots/create', renderSpotCreationForm)
 router.get('/spots/:id', renderSpotDetail)
-router.post('/spots', createSpot)
 
 export default router

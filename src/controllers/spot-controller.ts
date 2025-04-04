@@ -150,7 +150,3 @@ export const renderSpotDetail = async (req: Request, res: Response): Promise<voi
     res.status(500).send('Server Error')
   }
 }
-
-export const renderSpotCreationForm = (_req: Request, res: Response): void => {
-  res.render('spots/create')
-}

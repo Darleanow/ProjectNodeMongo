@@ -29,9 +29,9 @@ connectDB()
 app.get('/', (req, res) => res.render('index', { title: 'Accueil' }))
 app.get('/map', (req, res) => res.render('map', { title: 'Carte' }))
 
+app.use('/api/users', userRoutes)
 app.use(spotRoutes)
 app.use(alertRoutes)
-app.use(userRoutes)
 
 app.listen(port, () => {
     console.log(`✅ Server running on http://localhost:${port}`)
