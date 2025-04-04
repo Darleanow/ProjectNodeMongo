@@ -1,10 +1,142 @@
 extends ../layout
 
 block content
-  h2 Ajouter un nouveau spot
-  form(method='POST', action='/spots')
-    input(type='text', name='title', placeholder='Titre')
-    textarea(name='description', placeholder='Description')
-    input(type='text', name='lat', placeholder='Latitude')
-    input(type='text', name='lng', placeholder='Longitude')
-    button(type='submit') Envoyer
+  h2 Ajouter un spot ou une alerte
+
+  .form-container
+    form#unified-form(method='POST', action='/api/spots')
+      input#form-lat(type='hidden', name='lat')
+      input#form-lng(type='hidden', name='lng')
+
+      .form-group
+        label(for='form-title') Titre:
+        input#form-title(type='text', name='title', required)
+
+      .form-group
+        label(for='form-description') Description:
+        textarea#form-description(name='description', required, rows='4')
+
+      .form-group
+        label(for='form-category') Type:
+        select#form-category(name='category', required)
+          option(value='good-place') Bonnes adresses
+          option(value='alert') Alertes
+          option(value='event') Événements
+          option(value='other') Autres
+
+      #alert-fields.hidden
+        .form-group
+          label(for='alertType') Type d'alerte:
+          select#alertType(name='alertType')
+            option(value='traffic') Trafic
+            option(value='weather') Météo
+            option(value='safety') Sécurité
+            option(value='event') Événement
+            option(value='other') Autre
+
+        .form-group
+          label(for='severity') Niveau de sévérité (1–5):
+          input#severity(type='range', name='severity', min='1', max='5', value='3')
+          span#severity-value 3
+
+      .form-group
+        label(for='address-search') Recherche par adresse:
+        input#address-search(type='text', placeholder='Entrez une adresse')
+        button#search-button(type='button') Rechercher
+
+      input#form-author(type='hidden', name='author', value='645f340dca190f342a2ebb55')
+
+      .form-actions
+        button#submit-button(type='submit') Ajouter
+
+  script(src="https://unpkg.com/axios/dist/axios.min.js")
+  script.
+    (() => {
+      const form = document.getElementById('unified-form');
+      const category = document.getElementById('form-category');
+      const alertFields = document.getElementById('alert-fields');
+      const severityInput = document.getElementById('severity');
+      const severityValue = document.getElementById('severity-value');
+      const latInput = document.getElementById('form-lat');
+      const lngInput = document.getElementById('form-lng');
+      const addressInput = document.getElementById('address-search');
+      const authorInput = document.getElementById('form-author');
+
+      const updateAlertVisibility = () => {
+        const selected = category.value;
+        form.action = selected === 'alert' ? '/api/alerts' : '/api/spots';
+        alertFields.classList.toggle('hidden', selected !== 'alert');
+      };
+
+      const updateSeverityDisplay = () => {
+        severityValue.textContent = severityInput.value;
+      };
+
+      category.addEventListener('change', updateAlertVisibility);
+      severityInput.addEventListener('input', updateSeverityDisplay);
+
+      document.getElementById('search-button').addEventListener('click', async () => {
+        const query = addressInput.value.trim();
+        if (!query) return;
+        try {
+          const { data } = await axios.get(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`);
+          if (data?.length > 0) {
+            const { lat, lon } = data[0];
+            latInput.value = lat;
+            lngInput.value = lon;
+            alert(`Adresse trouvée: ${lat}, ${lon}`);
+          } else {
+            alert('Adresse non trouvée.');
+          }
+        } catch (err) {
+          console.error(err);
+          alert('Erreur lors de la recherche.');
+        }
+      });
+
+      form.addEventListener('submit', async (e) => {
+        const selected = category.value;
+        const lat = latInput.value;
+        const lng = lngInput.value;
+
+        if (!lat || !lng) {
+          e.preventDefault();
+          alert('Veuillez spécifier une position.');
+          return;
+        }
+
+        if (selected !== 'alert') return;
+
+        e.preventDefault(); // Handle alert flow manually
+
+        try {
+          const spotRes = await axios.post('/api/spots', {
+            title: form['title'].value,
+            description: form['description'].value,
+            category: 'alert',
+            lat: parseFloat(lat),
+            lng: parseFloat(lng),
+            author: authorInput.value
+          });
+
+          const alertRes = await axios.post('/api/alerts', {
+            spotId: spotRes.data._id,
+            alertType: form['alertType'].value,
+            severity: parseInt(form['severity'].value),
+            metadata: {
+              description: form['description'].value
+            }
+          });
+
+          alert('Alerte ajoutée avec succès!');
+          window.location.href = '/alerts';
+        } catch (err) {
+          console.error(err);
+          alert('Erreur lors de l’enregistrement.');
+        }
+      });
+
+      // Init
+      updateSeverityDisplay();
+      updateAlertVisibility();
+    })();
