@@ -17,6 +17,23 @@ block content
         if spot.updatedAt
           span.date(style="color: #718096; font-size: 0.9em;") Mis à jour le #{new Date(spot.updatedAt).toLocaleDateString()}
 
+      // Author information - new section
+      .author-info(style="display: flex; align-items: center; gap: 10px; margin: 10px 0; padding: 10px; background-color: rgba(255,255,255,0.05); border-radius: 8px;")
+        if spot.author && spot.author.photoURL
+          img.author-avatar(src=spot.author.photoURL alt="Avatar" style="width: 40px; height: 40px; border-radius: 50%;")
+        else
+          .author-avatar-placeholder(style="width: 40px; height: 40px; border-radius: 50%; background-color: #4a5568; display: flex; align-items: center; justify-content: center;")
+            span(style="color: white; font-weight: bold;")= spot.author && spot.author.name ? spot.author.name.charAt(0).toUpperCase() : '?'
+        
+        .author-details
+          p(style="margin: 0; font-weight: bold;") Ajouté par: 
+            if spot.author
+              span= spot.author.name || 'Utilisateur anonyme'
+            else
+              span Utilisateur inconnu
+          if spot.author && spot.author.email
+            p(style="margin: 0; font-size: 0.85em; color: #718096;")= spot.author.email
+
       .description
         p= spot.description
 
@@ -39,6 +56,11 @@ block content
         a.alerts-button(href=`/alerts?spotId=${spot._id}`, style="padding: 8px 15px; background-color: #f56565; color: white; text-decoration: none; border-radius: 4px;") Voir les alertes
 
       a.view-on-map-button(href=`/map#spot=${spot._id}`, style="padding: 8px 15px; background-color: #4299e1; color: white; text-decoration: none; border-radius: 4px;") Voir sur la carte principale
+      
+      // Edit and delete buttons (only shown to author)
+      if isAuthor
+        a.edit-button(href=`/spots/${spot._id}/edit`, style="padding: 8px 15px; background-color: #ed8936; color: white; text-decoration: none; border-radius: 4px;") Modifier
+        button.delete-button(data-id=spot._id, style="padding: 8px 15px; background-color: #e53e3e; color: white; border: none; border-radius: 4px; cursor: pointer;") Supprimer
 
   script.
     // Initialize the spot map
@@ -76,76 +98,36 @@ block content
         .addTo(map)
         .bindPopup(`<strong>${spotTitle}</strong><br>Catégorie: ${spotCategory}`);
 
-      L.circle([lat, lng], {
-        color: 'rgba(52, 152, 219, 0.3)',
-        fillColor: 'rgba(52, 152, 219, 0.1)',
-        fillOpacity: 0.5,
-        radius: 150
-      }).addTo(map);
-
-      fetch(`/api/spots/nearby?lat=${lat}&lng=${lng}&distance=0.5`)
-        .then(res => res.json())
-        .then(nearbySpots => {
-          const otherSpots = nearbySpots.filter(spot => spot._id !== "#{spot._id}");
-
-          if (otherSpots.length > 0) {
-            otherSpots.forEach(nearbySpot => {
-              const [nearbyLng, nearbyLat] = nearbySpot.coords.coordinates;
-
-              const nearbyIconUrl = nearbySpot.category === 'good-place' ? 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png' :
-                nearbySpot.category === 'alert' ? 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png' :
-                nearbySpot.category === 'event' ? 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png' :
-                'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-grey.png';
-
-              const nearbyIcon = L.icon({
-                iconUrl: nearbyIconUrl,
-                iconSize: [25, 41],
-                iconAnchor: [12, 41],
-                popupAnchor: [1, -34],
-                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-                shadowSize: [41, 41],
-                opacity: 0.7
-              });
-
-              L.marker([nearbyLat, nearbyLng], { icon: nearbyIcon, opacity: 0.7 })
-                .addTo(map)
-                .bindPopup(`
-                  <strong>${nearbySpot.title}</strong><br>
-                  <span style="font-size: 0.9em;">${nearbySpot.category}</span><br>
-                  <a href="/spots/${nearbySpot._id}">Voir détails</a>
-                `);
+      // Handle delete button if present
+      const deleteButton = document.querySelector('.delete-button');
+      if (deleteButton) {
+        deleteButton.addEventListener('click', function() {
+          if (confirm('Êtes-vous sûr de vouloir supprimer ce spot ? Cette action est irréversible.')) {
+            const spotId = this.dataset.id;
+            
+            // Use the auth token if available
+            const headers = { 'Content-Type': 'application/json' };
+            const token = localStorage.getItem('authToken');
+            if (token) {
+              headers['Authorization'] = `Bearer ${token}`;
+            }
+            
+            fetch(`/api/spots/${spotId}`, {
+              method: 'DELETE',
+              headers: headers
+            })
+            .then(response => {
+              if (response.ok) {
+                window.location.href = '/spots';
+              } else {
+                throw new Error('Failed to delete spot');
+              }
+            })
+            .catch(error => {
+              console.error('Error:', error);
+              alert('An error occurred while trying to delete the spot.');
             });
           }
-        })
-        .catch(err => {
-          console.error('Error loading nearby spots:', err);
         });
-
-      // Add street name if available
-      fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`)
-        .then(res => res.json())
-        .then(data => {
-          if (data && data.display_name) {
-            // Add an info box with the address
-            const addressInfo = L.control({position: 'bottomleft'});
-
-            addressInfo.onAdd = function(map) {
-              const div = L.DomUtil.create('div', 'address-info');
-              div.style.background = 'white';
-              div.style.padding = '8px 12px';
-              div.style.borderRadius = '4px';
-              div.style.boxShadow = '0 1px 5px rgba(0,0,0,0.2)';
-              div.style.fontSize = '12px';
-              div.style.maxWidth = '300px';
-              div.innerHTML = `<strong>Adresse:</strong> ${data.display_name}`;
-              return div;
-            };
-
-            addressInfo.addTo(map);
-          }
-        })
-        .catch(err => {
-          console.error('Error fetching address:', err);
-          // Silently fail, as this is just an enhancement
-        });
+      }
     });

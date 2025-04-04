@@ -9,6 +9,7 @@ import connectDB from './database/database.js'
 import spotRoutes from './routes/spot.js'
 import alertRoutes from './routes/alert.js'
 import userRoutes from './routes/user.js'
+import authRoutes from './routes/auth.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -29,6 +30,7 @@ connectDB()
 app.get('/', (req, res) => res.render('index', { title: 'Accueil' }))
 app.get('/map', (req, res) => res.render('map', { title: 'Carte' }))
 
+app.use(authRoutes)
 app.use('/api/users', userRoutes)
 app.use(spotRoutes)
 app.use(alertRoutes)

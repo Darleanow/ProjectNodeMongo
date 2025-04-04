@@ -1,8 +1,17 @@
 header
   h1 Mon App Communautaire
   nav
-    ul
+    ul.main-nav
       li: a(href='/') Accueil
       li: a(href='/map') Carte
       li: a(href='/spots') Spots
       li: a(href='/alerts') Alertes
+    
+    .auth-container
+      #user-display.user-display(style="display: none; align-items: center; gap: 0.5rem;")
+        img#user-avatar.user-avatar(src="/img/default-avatar.png" alt="Avatar" style="width: 32px; height: 32px; border-radius: 50%;")
+        span#user-email.user-email
+        button#logout-button.button(style="display: none;") Déconnexion
+      
+      .login-actions
+        a#login-link.button(href="/auth/login") Connexion

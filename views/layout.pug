@@ -6,6 +6,11 @@ html
     link(rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css")
     script(src="https://unpkg.com/leaflet/dist/leaflet.js")
     script(src="/js/toast-notification.js" defer)
+    
+    // Firebase SDK
+    script(src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js")
+    script(src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js")
+    script(src="/js/firebase-auth.js")
 
   body
     include partials/header
@@ -13,3 +18,32 @@ html
     block content
 
     include partials/footer
+    
+    script.
+      // Initialize Firebase Auth UI when DOM is loaded
+      document.addEventListener('DOMContentLoaded', function() {
+        // Replace with your Firebase config from the Firebase Console
+        const firebaseConfig = {
+          apiKey: "YOUR_API_KEY",
+          authDomain: "YOUR_AUTH_DOMAIN",
+          projectId: "YOUR_PROJECT_ID"
+        };
+        
+        // Initialize Auth UI if not on login/register pages (those initialize it themselves)
+        if (!window.location.pathname.includes('/auth/login') && 
+            !window.location.pathname.includes('/auth/register')) {
+          const authUI = new FirebaseAuthUI(firebaseConfig);
+        }
+        
+        // Update authentication UI elements
+        const loginLink = document.getElementById('login-link');
+        const logoutButton = document.getElementById('logout-button');
+        
+        if (localStorage.getItem('authToken')) {
+          if (loginLink) loginLink.style.display = 'none';
+          if (logoutButton) logoutButton.style.display = 'inline-block';
+        } else {
+          if (loginLink) loginLink.style.display = 'inline-block';
+          if (logoutButton) logoutButton.style.display = 'none';
+        }
+      });
