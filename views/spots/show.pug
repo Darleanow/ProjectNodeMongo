@@ -77,12 +77,11 @@ block content
         .addTo(map)
         .bindPopup(`<strong>${spotTitle}</strong><br>Catégorie: ${spotCategory}`);
 
-      // Add a circle to indicate approximate area
       L.circle([lat, lng], {
-        color: 'rgba(52, 152, 219, 0.3)' 
-        fillColor: 'rgba(52, 152, 219, 0.1)' 
+        color: 'rgba(52, 152, 219, 0.3)',
+        fillColor: 'rgba(52, 152, 219, 0.1)',
         fillOpacity: 0.5,
-        radius: 150 // 150 meters radius
+        radius: 150
       }).addTo(map);
 
       // Add nearby spots if any
