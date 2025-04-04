@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import Spot from '../models/Spot'
+import Spot from '../models/Spot.js'
 
 export const getAllSpots = async (req: Request, res: Response): Promise<void> => {
   try {

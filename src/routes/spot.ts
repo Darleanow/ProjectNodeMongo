@@ -8,7 +8,7 @@ import {
   findSpotsByDistance,
   renderSpotsList,
   renderSpotDetail
-} from '@/controllers/spot-controller.js'
+} from '../controllers/spot-controller.js'
 
 const router = express.Router()
 

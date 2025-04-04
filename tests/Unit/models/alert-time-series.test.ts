@@ -4,7 +4,7 @@ import dotenv from 'dotenv'
 
 dotenv.config()
 
-const TIMEOUT = 30000
+const TIMEOUT = 5000
 
 beforeAll(async () => {
     jest.setTimeout(TIMEOUT)

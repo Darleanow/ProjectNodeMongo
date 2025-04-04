@@ -3,6 +3,14 @@ export default {
   testEnvironment: 'node',
   extensionsToTreatAsEsm: ['.ts'],
   transform: {
-    '^.+\\.ts$': ['ts-jest', { useESM: true }]
-  }
-}
+    '^.+\\.tsx?$': ['ts-jest', {
+      useESM: true,
+    }]
+  },
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1'
+  },
+  moduleDirectories: ['node_modules', 'src'],
+  modulePaths: ['<rootDir>/src'],
+  roots: ['<rootDir>/src', '<rootDir>/tests']
+};
