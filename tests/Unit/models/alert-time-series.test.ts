@@ -8,7 +8,7 @@ const TIMEOUT = 5000
 
 beforeAll(async () => {
     jest.setTimeout(TIMEOUT)
-    const mongoUri = process.env.MONGO_URI || 'mongodb://localhost:27017/test-alerts'
+    const mongoUri = process.env.MONGO_URI!
     await mongoose.connect(mongoUri)
 }, TIMEOUT)
 
