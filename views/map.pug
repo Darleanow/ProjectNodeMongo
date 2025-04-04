@@ -209,12 +209,12 @@ block content
               }
             }, 100);
           } else {
-            alert('Adresse non trouvée');
+            toast.error('Adresse non trouvée');
           }
         })
         .catch(error => {
           console.error('Error during geocoding:', error);
-          alert('Erreur lors de la recherche d\'adresse');
+          toast.error('Erreur lors de la recherche d\'adresse');
         });
     });
 
@@ -317,10 +317,10 @@ block content
             });
         }, error => {
           console.error('Error getting location:', error);
-          alert('Impossible de récupérer votre position.');
+          toast.error('Impossible de récupérer votre position.');
         });
       } else {
-        alert('La géolocalisation n\'est pas supportée par votre navigateur.');
+        toast.warning('La géolocalisation n\'est pas supportée par votre navigateur.');
       }
     });
 
@@ -398,7 +398,7 @@ block content
 
 
       if (isNaN(lat) || isNaN(lng)) {
-        alert('Veuillez spécifier une position en utilisant la recherche d\'adresse');
+        toast.info('Veuillez spécifier une position en utilisant la recherche d\'adresse');
         return;
       }
 
@@ -488,11 +488,11 @@ block content
           document.getElementById('new-spot-form').reset();
 
 
-          alert('Alerte ajoutée avec succès!');
+          toast.success('Alerte ajoutée avec succès!');
         })
         .catch(err => {
           console.error('Error adding alert:', err);
-          alert('Erreur lors de l\'ajout de l\'alerte. Veuillez réessayer.');
+          toast.error('Erreur lors de l\'ajout de l\'alerte. Veuillez réessayer.');
         });
       } else {
 
@@ -552,11 +552,11 @@ block content
           document.getElementById('new-spot-form').reset();
 
 
-          alert('Spot ajouté avec succès!');
+          toast.success('Spot ajouté avec succès!');
         })
         .catch(err => {
           console.error('Error adding spot:', err);
-          alert('Erreur lors de l\'ajout du spot. Veuillez réessayer.');
+          toast.error('Erreur lors de l\'ajout du spot. Veuillez réessayer.');
         });
       }
     });
@@ -568,7 +568,7 @@ block content
 
 
     document.getElementById('show-map-help').addEventListener('click', function() {
-      alert('Pour ajouter un nouveau spot ou une alerte:\n\n1. Utilisez la barre de recherche pour trouver un lieu, puis cliquez sur "Créer un spot ici"\n\nOU\n\n2. Activez le mode "Ajout de spot" puis cliquez directement sur la carte');
+      toast.info('Pour ajouter un nouveau spot ou une alerte:\n\n1. Utilisez la barre de recherche pour trouver un lieu, puis cliquez sur "Créer un spot ici"\n\nOU\n\n2. Activez le mode "Ajout de spot" puis cliquez directement sur la carte');
     });
 
     function checkForSpotHighlight() {

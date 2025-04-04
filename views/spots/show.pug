@@ -72,7 +72,6 @@ block content
         shadowSize: [41, 41]
       });
 
-      // Add marker for the spot
       L.marker([lat, lng], { icon: icon })
         .addTo(map)
         .bindPopup(`<strong>${spotTitle}</strong><br>Catégorie: ${spotCategory}`);
@@ -84,19 +83,15 @@ block content
         radius: 150
       }).addTo(map);
 
-      // Add nearby spots if any
       fetch(`/api/spots/nearby?lat=${lat}&lng=${lng}&distance=0.5`)
         .then(res => res.json())
         .then(nearbySpots => {
-          // Filter out the current spot
           const otherSpots = nearbySpots.filter(spot => spot._id !== "#{spot._id}");
 
           if (otherSpots.length > 0) {
             otherSpots.forEach(nearbySpot => {
-              // Get coordinates from GeoJSON format
               const [nearbyLng, nearbyLat] = nearbySpot.coords.coordinates;
 
-              // Custom icon based on nearby spot category
               const nearbyIconUrl = nearbySpot.category === 'good-place' ? 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png' :
                 nearbySpot.category === 'alert' ? 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png' :
                 nearbySpot.category === 'event' ? 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png' :
