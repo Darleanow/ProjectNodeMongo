@@ -3,30 +3,29 @@ extends layout
 block content
   h2 Carte des spots
 
-  .map-controls(style="margin-bottom: 15px;")
-    // Add address search bar
-    .address-search-container(style="margin-bottom: 15px;")
-      label(for="map-address-search") Rechercher un lieu:
-      input#map-address-search(type="text" placeholder="Entrez une adresse" style="width: 60%; margin-right: 10px; padding: 8px;")
-      button#map-address-search-button(style="padding: 8px 15px;") Rechercher
-      #map-address-results(style="display: none; position: absolute; z-index: 1000;")
+  .map-controls(style="margin-bottom: 20px; padding: 15px; border-radius: 12px; background: rgba(255,255,255,0.02); backdrop-filter: blur(6px); display: flex; flex-direction: column; gap: 20px;")
 
-    label(for="category-filter") Filtrer par catégorie:
-    select#category-filter(style="margin: 0 10px;")
-      option(value="all") Tous
-      option(value="good-place") Bonnes adresses
-      option(value="alert") Alertes
-      option(value="event") Événements
-      option(value="other") Autres
+  // Recherche
+  .address-search-container(style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center;")
+    label(for="map-address-search", style="color: #fff; font-weight: 500;") Rechercher un lieu:
+    input#map-address-search(type="text", placeholder="Entrez une adresse", style="flex: 1; min-width: 200px; padding: 8px; border-radius: 8px; border: 1px solid #22c55e; background-color: #0f0f0f; color: white;")
+    button#map-address-search-button(style="padding: 8px 15px; border-radius: 8px; background-color: #fb923c; color: #000; box-shadow: 0 0 15px #fb923c; border: none;") Rechercher
+    #map-address-results(style="display: none; position: absolute; z-index: 1000; color: #FFFFFF;")
 
-    button#user-location(style="margin-left: 10px;") Utiliser ma position
+  // Filtres + bouton + switch
+  .filters-row(style="display: flex; flex-wrap: wrap; gap: 15px; align-items: center; justify-content: space-between;")
 
-    .add-mode-toggle(style="display: inline-flex; align-items: center; gap: 10px; margin-left: 15px;")
-  label(for="toggle-add-mode" style="display: flex; align-items: center; gap: 10px; cursor: pointer;")
-    .toggle-switch
-      input#toggle-add-mode(type="checkbox")
-      .toggle-slider
-    span Mode ajout de spot
+    .filter-select(style="display: flex; align-items: center; gap: 10px;")
+      label(for="category-filter", style="color: #fff; font-weight: 500;") Filtrer par catégorie:
+      select#category-filter(style="padding: 8px; border-radius: 6px; background-color: #0f0f0f; color: white; border: 1px solid #333;")
+
+    button#user-location(style="padding: 8px 15px; border-radius: 8px; background-color: #fb923c; color: #000; box-shadow: 0 0 15px #fb923c; border: none;") Utiliser ma position
+
+    .add-mode-toggle(style="display: flex; align-items: center; gap: 10px;")
+      label.toggle-switch(for="toggle-add-mode")
+        input#toggle-add-mode(type="checkbox")
+        span.slider
+      span(style="color: #fff; font-size: 0.95rem;") Mode ajout de spot
 
   #map(style="height: 500px;")
 
