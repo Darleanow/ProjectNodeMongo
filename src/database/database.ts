@@ -1,6 +1,9 @@
 import { connect } from 'mongoose'
-// eslint-disable-next-line prefer-const
-let monURI = 'mongodb://localhost:27017/express-typescript-demo'
+import dotenv from 'dotenv'
+
+dotenv.config()
+
+const monURI = process.env.MONGO_URI
 
 const connectDB = async () => {
   try {
@@ -8,7 +11,6 @@ const connectDB = async () => {
     console.log('MongoDB Connected...')
   } catch (err) {
     console.error(err.message)
-    // Exit process with failure
     process.exit(1)
   }
 }
