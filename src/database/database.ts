@@ -8,6 +8,16 @@ if (!monURI) {
   throw new Error('❌ MONGO_URI is not defined in environment variables')
 }
 
+/**
+ * Connects to MongoDB using the URI provided in the `.env` file.
+ * 
+ * - Exits the process with code 1 if connection fails.
+ * - Uses the native Mongoose connect function.
+ * 
+ * Environment:
+ *   - MONGO_URI must be defined in environment variables.
+ */
+
 const connectDB = async () => {
   try {
     await connect(monURI)

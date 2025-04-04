@@ -1,6 +1,10 @@
 import { Request, Response } from 'express'
 import Spot from '../models/Spot.js'
 
+/**
+ * Retrieves all spots from the database,
+ * including basic info about the author (name, email).
+ */
 export const getAllSpots = async (req: Request, res: Response): Promise<void> => {
   try {
     const spots = await Spot.find().populate('author', 'name email')
@@ -11,6 +15,10 @@ export const getAllSpots = async (req: Request, res: Response): Promise<void> =>
   }
 }
 
+/**
+ * Retrieves a single spot by its ID.
+ * Returns 404 if not found.
+ */
 export const getSpotById = async (req: Request, res: Response): Promise<void> => {
   try {
     const spot = await Spot.findById(req.params.id).populate('author', 'name email')
@@ -25,10 +33,14 @@ export const getSpotById = async (req: Request, res: Response): Promise<void> =>
   }
 }
 
+/**
+ * Creates a new spot from request data (title, description, category, location, author).
+ * Stores geographic coordinates as GeoJSON Point.
+ */
 export const createSpot = async (req: Request, res: Response): Promise<void> => {
   try {
     const { title, description, category, lat, lng, author } = req.body
-    
+
     const newSpot = new Spot({
       title,
       description,
@@ -39,7 +51,7 @@ export const createSpot = async (req: Request, res: Response): Promise<void> => 
       },
       author
     })
-    
+
     const spot = await newSpot.save()
     res.json(spot)
   } catch (err) {
@@ -48,6 +60,10 @@ export const createSpot = async (req: Request, res: Response): Promise<void> => 
   }
 }
 
+/**
+ * Updates an existing spot by its ID with optional fields (title, description, category, coords).
+ * Returns 404 if not found.
+ */
 export const updateSpot = async (req: Request, res: Response): Promise<void> => {
   try {
     const { title, description, category, lat, lng } = req.body
@@ -86,6 +102,9 @@ export const updateSpot = async (req: Request, res: Response): Promise<void> => 
   }
 }
 
+/**
+ * Deletes a spot by its ID. Returns 404 if the spot is not found.
+ */
 export const deleteSpot = async (req: Request, res: Response): Promise<void> => {
   try {
     const spot = await Spot.findById(req.params.id)
@@ -103,6 +122,10 @@ export const deleteSpot = async (req: Request, res: Response): Promise<void> => 
   }
 }
 
+/**
+ * Finds all spots within a given distance (in kilometers) of a location (lat/lng).
+ * Returns 400 if latitude or longitude is missing.
+ */
 export const findSpotsByDistance = async (req: Request, res: Response): Promise<void> => {
   try {
     const { lat, lng, distance = 5 } = req.query as {
@@ -137,6 +160,9 @@ export const findSpotsByDistance = async (req: Request, res: Response): Promise<
   }
 }
 
+/**
+ * Renders the full list of spots for display in the frontend.
+ */
 export const renderSpotsList = async (_req: Request, res: Response): Promise<void> => {
   try {
     const spots = await Spot.find()
@@ -147,6 +173,10 @@ export const renderSpotsList = async (_req: Request, res: Response): Promise<voi
   }
 }
 
+/**
+ * Renders the detail view for a single spot.
+ * Returns 404 with error view if not found.
+ */
 export const renderSpotDetail = async (req: Request, res: Response): Promise<void> => {
   try {
     const spot = await Spot.findById(req.params.id).populate('author', 'name email')

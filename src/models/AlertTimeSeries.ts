@@ -1,5 +1,9 @@
 import { Schema, model, Types, Document } from 'mongoose'
 
+/**
+ * Interface for the metadata associated with an alert.
+ * Allows for flexible key-value entries.
+ */
 export interface IAlertMetadata {
   description?: string
   location?: string
@@ -7,6 +11,10 @@ export interface IAlertMetadata {
   [key: string]: string | number | boolean | undefined
 }
 
+/**
+ * Document interface for a time-series alert.
+ * Each alert is linked to a Spot (via `spotId`) and includes a timestamped severity level.
+ */
 export interface IAlertTimeSeries extends Document {
   spotId: Types.ObjectId
   alertType: 'traffic' | 'weather' | 'safety' | 'event' | 'other'
@@ -15,6 +23,17 @@ export interface IAlertTimeSeries extends Document {
   timestamp: Date
 }
 
+/**
+ * Mongoose schema for storing alert time-series data.
+ * 
+ * Time-series collection parameters:
+ *   - timeField: 'timestamp'
+ *   - metaField: 'spotId'
+ *   - granularity: 'seconds'
+ * 
+ * Note: Time series optimizations only apply if the collection is created manually
+ * with `db.createCollection` using the same options.
+ */
 const alertTimeSeriesSchema = new Schema<IAlertTimeSeries>(
   {
     spotId: {
